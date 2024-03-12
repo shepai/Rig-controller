@@ -17,3 +17,9 @@ class controller:
         return value
     def sendCommand(self,message):
         self.ser.write(message.encode())
+    def move(self,x,y,z,a):
+        #move the rig by these amounts
+        pass
+    def getPressure(self):
+        #find weight of sensor touch
+        pass
