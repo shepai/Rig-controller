@@ -36,14 +36,14 @@ class Rig:
         while sum(self.readButtons())>0: #loop till all pressed
             states=np.ones((4,))*np.array(self.readButtons())
             self.moveMotors(states[0],states[1],states[2],states[3]) #only move ones not pressed
-    def moveMotors(self,x,y,z,a):
+    def moveMotors(self,x,y,z,a,style=stepper.SINGLE):
         #move each motor by each value
         motors=[x,y,z,a]
         directions=[stepper.BACKWARD if motors[i]<0 else stepper.FORWARD for i in range(len(motors))]
         for i in range(max(motors)): #schedule together
             for j in range(len(motors)):
                 if motors[j]>0:
-                    self.motors[j].onestep(direction=directions[j], style=stepper.SINGLE)
+                    self.motors[j].onestep(direction=directions[j], style=style)
                     motors[j]-=1
     def readBase(self):
         #read the force on rig
