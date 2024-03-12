@@ -5,7 +5,7 @@ import time
 import supervisor
 from adafruit_motor import stepper
 import digitalio
-import numpy as np
+import ulab.numpy as np
 
 class Rig:
     def __init__(self):    
@@ -17,7 +17,7 @@ class Rig:
         self.motors=[self.kit1.stepper1,self.kit1.stepper2,self.kit2.stepper1,self.kit2.stepper2]
         #set up buttons
         # Define the pins for the buttons
-        button_pins = [board.GP2, board.GP3, board.GP4, board.GP5]
+        button_pins = [board.GP4, board.GP5, board.GP6, board.GP7] #arduino 2,3,4,5
 
         # Initialize an array to hold the button objects
         buttons = []
@@ -29,6 +29,8 @@ class Rig:
             button.pull = digitalio.Pull.UP
             buttons.append(button)
         self.buttons=buttons
+        #TODO set up the pressure plate
+
     def resetRig(self):
         #move the rig till in the reset position
         while sum(self.readButtons())>0: #loop till all pressed
