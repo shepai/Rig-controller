@@ -19,7 +19,7 @@ class Rig:
     The foot or pressure sensor should be connected either through:
         I2C on 14 and 15
         or
-        GP
+        GP8, GP9, GP2, GP3 and the access pin to either ground or GP20
     """
     def __init__(self,plate_mode=0):    
         #set up all i2c devices and motors
@@ -40,14 +40,13 @@ class Rig:
             button.pull = digitalio.Pull.UP
             buttons.append(button)
         self.buttons=buttons
-        #TODO set up the pressure plate
         #Initialise the plate
         self.plate=plate_mode
         if self.plate==1: #option one is normal plate
-            pins=[board.GP4, board.GP5, board.GP6, board.GP7]
-            self.sensor_plate=Foot(pins,board.GP26,board.GP8,alpha=0.2)
+            pins=[board.GP8, board.GP9, board.GP2, board.GP3]
+            self.sensor_plate=Foot(pins,board.GP26,board.GP20,alpha=0.2)
         elif self.plate==2: #plate is i2c
-            pass
+           self.sensor_plate=Plate(board.GP26,i2c=None,address=0x21,sda=None,scl=None,alpha=0.1)
 
     def resetRig(self):
         #move the rig till in the reset position
@@ -65,7 +64,9 @@ class Rig:
                     motors[j]-=1
     def readBase(self):
         #read the force on rig
-        pass
+        if self.plate>0:
+            return self.sensor_plate.read()
+        return -1
     def readButtons(self):
         states = []
         for button in self.buttons:
