@@ -6,11 +6,24 @@ import supervisor
 from adafruit_motor import stepper
 import digitalio
 import ulab.numpy as np
+from Tactile_CP import * #found on my github
 
 class Rig:
-    def __init__(self):    
+    """
+    Pinout
+
+    I2C GP14 and GP15
+    The buttons must be connceted to
+    GP4,GP5 GP6 and GP7 each corrosponding to axis x,y,z,a
+    Stepper motors must be x to board 1 y to board 1 z to board 2 a to board 2
+    The foot or pressure sensor should be connected either through:
+        I2C on 14 and 15
+        or
+        GP
+    """
+    def __init__(self,plate_mode=0):    
         #set up all i2c devices and motors
-        self.i2c=i2c = busio.I2C(board.GP14, board.GP15)
+        self.i2c = busio.I2C(board.GP14, board.GP15)
         self.kit1 = MotorKit(i2c=self.i2c)
         self.kit2 = MotorKit(address=0x71,i2c=self.i2c)
         self.position=[-1,-1,-1,-1]
@@ -21,8 +34,6 @@ class Rig:
 
         # Initialize an array to hold the button objects
         buttons = []
-
-        # Initialize the button objects
         for pin in button_pins:
             button = digitalio.DigitalInOut(pin)
             button.direction = digitalio.Direction.INPUT
@@ -30,6 +41,13 @@ class Rig:
             buttons.append(button)
         self.buttons=buttons
         #TODO set up the pressure plate
+        #Initialise the plate
+        self.plate=plate_mode
+        if self.plate==1: #option one is normal plate
+            pins=[board.GP4, board.GP5, board.GP6, board.GP7]
+            self.sensor_plate=Foot(pins,board.GP26,board.GP8,alpha=0.2)
+        elif self.plate==2: #plate is i2c
+            pass
 
     def resetRig(self):
         #move the rig till in the reset position
