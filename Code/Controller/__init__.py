@@ -17,9 +17,11 @@ class Controller:
         return value.replace(">","").replace("<","")
     def sendCommand(self,message):
         self.ser.write(message.encode())
+    def reset(self):
+        self.sendCommand("RESET")
     def move(self,x,y,z,a):
         #move the rig by these amounts
-        self.sendCommand("x:"+str(x)+",y:"+str(y)+",z"+str(z)+",a:"+str(a))
+        self.sendCommand("MOVEx:"+str(x)+",y:"+str(y)+",z"+str(z)+",a:"+str(a))
     def getPressure(self):
         #find weight of sensor touch
         self.sendCommand("pressure")
