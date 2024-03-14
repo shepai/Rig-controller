@@ -29,14 +29,14 @@ The rig, once wired makes use of a serial connection. We set up the PC library b
 
 ```python
 import Controller
-c=controller('COM6')
+c=Controller('COM6')
 ```
 
 From here we can control read and write to the device. The listener will keep reading until the device sends "<" back. Bare in mind it will loop forever if your board never sends that symbol.
 
 ```python
 import controller
-c=controller('COM6')
+c=Controller('COM6')
 c.sendCommand('test command')
 data=c.listen_for_data()
 print("data recieved:",data)
