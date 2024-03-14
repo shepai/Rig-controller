@@ -1,7 +1,7 @@
 import time
 import serial
 
-class controller:
+class Controller:
     def __init__(self,COM):
         self.ser = serial.Serial(COM, 115200)  # open serial port
 
@@ -14,12 +14,18 @@ class controller:
                 break
             else:
                 value += a
-        return value
+        return value.replace(">","").replace("<","")
     def sendCommand(self,message):
         self.ser.write(message.encode())
     def move(self,x,y,z,a):
         #move the rig by these amounts
-        pass
+        self.sendCommand("x:"+str(x)+",y:"+str(y)+",z"+str(z)+",a:"+str(a))
     def getPressure(self):
         #find weight of sensor touch
-        pass
+        self.sendCommand("pressure")
+        pressure=self.listen_for_data()
+        ar=[]
+        for item in pressure.split(","):
+            ar.append(int(item))
+        return ar
+
