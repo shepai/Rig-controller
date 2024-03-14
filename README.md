@@ -12,4 +12,29 @@ We make use of a force matrix sensor such as the ones developed in the <a href="
 ## Set up
 The Rig is controlled by a Raspberry Pi Pico. It uses I2C to connect to two Adafruit stepper motor controllers. One of the addresss (the board that controls axis z) must be soldered over to avoid desturbing the default pin address of the first board.
 
-## Controlling the Rig
+The rig works via serial connection to the PC device. The PC side code is in <a href="https://github.com/shepai/Rig-controller/tree/main/Code/boardSide">boardSide</a> whereas any code that runs on the device is under <a href="https://github.com/shepai/Rig-controller/tree/main/Code/Controller"></a>.
+
+### Dependancies 
+#### PC dependancies
+- Serial
+#### Circuit Python dependencies
+- adafruit_motor
+- <a href="https://github.com/shepai/TactileSensor">Tactile_CP</a>
+- adafruit_register
+
+The dependancies will need to be installed on the respective devices. 
+
+### Control
+The rig, once wired makes use of a serial connection. We set up the PC library by importing it. The parameter should be the COM your board is on. "COM6" is an example.
+
+```python
+import Controller
+c=controller('COM6')
+```
+
+From here we can control read and write to the device. The listener will keep reading until the device sends "<" back. Bare in mind it will loop forever if your board never sends that symbol.
+
+```python
+import controller
+c=controller('COM6')
+```
