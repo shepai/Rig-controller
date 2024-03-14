@@ -37,4 +37,9 @@ From here we can control read and write to the device. The listener will keep re
 ```python
 import controller
 c=controller('COM6')
+c.sendCommand('test command')
+data=c.listen_for_data()
+print("data recieved:",data)
 ```
+
+
