@@ -23,6 +23,7 @@ The rig works via serial connection to the PC device. The PC side code is in <a 
 - adafruit_register
 
 The dependancies will need to be installed on the respective devices. 
+The device should be using the example board code <a href="https://github.com/shepai/Rig-controller/blob/main/Code/Examples/Board%20Examples/listener.py">"listener.py"</a>, which will listen for the commands that our controller on the PC puts out. Adapt the code to use the parameter ```plate_mode=1``` or ```plate_mode=2``` if you are using one of the pressure pad boards. Otherwise nothing will be returned.
 
 ### Control
 The rig, once wired makes use of a serial connection. We set up the PC library by importing it. The parameter should be the COM your board is on. "COM6" is an example.
@@ -37,9 +38,26 @@ From here we can control read and write to the device. The listener will keep re
 ```python
 import controller
 c=Controller('COM6')
-c.sendCommand('test command')
-data=c.listen_for_data()
+c.sendCommand('test command') #will be ignored
+data=c.listen_for_data() #should return incorrect command
 print("data recieved:",data)
 ```
 
+To move the rig use the following commands:
+```python
+import controller
+c=Controller('COM6')
+x_value=10
+y_value=12
+z_value=-5
+a_value=0
+c.move(x_value,y_value,z_value,a_value) #move all of the motors by the set amounts
+```
 
+We can read pressure on the base with the command:
+
+```python
+import controller
+c=Controller('COM6')
+print("base pressures",c.getPressure())
+```
