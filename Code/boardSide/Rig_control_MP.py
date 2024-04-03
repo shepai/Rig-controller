@@ -11,7 +11,7 @@ class Rig:
     """
     Pinout
 
-    I2C GP14 and GP15
+    I2C GP14 and GP15 or if using the adafruit metro use GP25 and GP24
     The buttons must be connceted to
     GP4,GP5 GP6 and GP7 each corrosponding to axis x,y,z,a
     Stepper motors must be x to board 1 y to board 1 z to board 2 a to board 2
@@ -22,7 +22,7 @@ class Rig:
     """
     def __init__(self,plate_mode=0):    
         #set up all i2c devices and motors
-        self.i2c = busio.I2C(sda=board.GP14,scl=board.GP15)
+        self.i2c = busio.I2C(scl=board.GP25, sda=board.GP24)
         self.kit1 = MotorKit(address=0x70,i2c=self.i2c)
         self.kit2 = MotorKit(address=0x60,i2c=self.i2c)
         self.position=[-1,-1,-1,-1]
@@ -72,3 +72,4 @@ class client:
     def send(self,message):
         print(f">{message}<")
     
+
