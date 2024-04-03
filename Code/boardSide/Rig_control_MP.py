@@ -11,7 +11,7 @@ class Rig:
     """
     Pinout
 
-    I2C GP14 and GP15 or if using the adafruit metro use GP25 and GP24
+    I2C GP14 and GP15
     The buttons must be connceted to
     GP4,GP5 GP6 and GP7 each corrosponding to axis x,y,z,a
     Stepper motors must be x to board 1 y to board 1 z to board 2 a to board 2
@@ -46,7 +46,7 @@ class Rig:
         while sum(self.readButtons())>0: #loop till all pressed
             states=[self.readButtons()[i]*1 for i in range(len(self.readButtons()))]
             self.moveMotors(states[0],states[1],states[2],states[3]) #only move ones not pressed
-    def moveMotors(self,x,y,z,a,style=stepper.SINGLE):
+    def moveMotors(self,x,y,z,a,style=stepper.INTERLEAVE):
         #move each motor by each value
         motors=[x,y,z,a]
         directions=[stepper.BACKWARD if motors[i]<0 else stepper.FORWARD for i in range(len(motors))]
@@ -72,4 +72,3 @@ class client:
     def send(self,message):
         print(f">{message}<")
     
-
