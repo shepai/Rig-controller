@@ -50,6 +50,7 @@ class Rig:
         #move each motor by each value
         motors=[x,y,z,a]
         directions=[stepper.BACKWARD if motors[i]<0 else stepper.FORWARD for i in range(len(motors))]
+        motors=[abs(motors[i]) for i in range(len(motors))]
         for i in range(max(motors)): #schedule together
             for j in range(len(motors)):
                 if motors[j]>0:
