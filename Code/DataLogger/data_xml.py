@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import pandas as pd
 
 class Experiment:
     def __init__(self,ID,texture,angle,speed):
@@ -40,8 +41,37 @@ class Loader: #class for generating datasets and labels from the gathered experi
         tree = ET.parse(filename+".xml")
         # Get the root element
         self.dataset = tree.getroot()
+    def convertText(self,data):
+        data=data.replace("[","").replace("]","").replace(" ","")
+        data=data.split(",")
+        ints=[]
+        for entry in data:
+            ints.append(int(entry))
+        return ints
     def getByExperiment(self):
-        pass
+        label=[]
+        positions=[]
+        readings=[]
+        trials=[]
+        times=[]
+        for exp in self.dataset.findall("Experiment"):
+            for trial in exp.findall("Trial"):
+                for reading in trial.findall("Reading"):
+                    for position,data in zip(reading.findall("Position"),reading.findall("Data")):
+                        trials.append(trial.get("No"))
+                        label.append(exp.get("Texture"))
+                        readings.append(self.convertText(data.text))
+                        positions.append(self.convertText(position.text))
+                        times.append(reading.get("Time"))
+                    
+        data = {
+            "Trial": trials,
+            "Textures": label,
+            "Positions": positions,
+            "Readings": readings
+        }
+        df = pd.DataFrame(data)
+        return df
     def getByPressure(self):
         pass
     def getBySpeed(self):
@@ -51,6 +81,9 @@ class Loader: #class for generating datasets and labels from the gathered experi
     def getByDirection(self):
         pass
 
+loader=Loader("C:/Users/dexte/Documents/GitHub/Rig-controller/Code/DataLogger/test.xml")
+frame=loader.getByExperiment()
+print(frame)
 """test=Experiment(1,"ss",80,20)
 test.create_trial()
 test.upload([0,1,1,0],0.1,[1,2,3])
