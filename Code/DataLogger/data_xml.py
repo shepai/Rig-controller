@@ -50,15 +50,19 @@ class Loader: #class for generating datasets and labels from the gathered experi
         return ints
     def getByExperiment(self):
         label=[]
+        angles=[]
+        speeds=[]
         positions=[]
         readings=[]
         trials=[]
         times=[]
-        for exp in self.dataset.findall("Experiment"):
+        for exp in self.dataset.findall("Experiment"): #get all information in respect to different experiments
             for trial in exp.findall("Trial"):
                 for reading in trial.findall("Reading"):
                     for position,data in zip(reading.findall("Position"),reading.findall("Data")):
                         trials.append(trial.get("No"))
+                        angles.append(exp.get("Angle"))
+                        speeds.append(exp.get("Speed"))
                         label.append(exp.get("Texture"))
                         readings.append(self.convertText(data.text))
                         positions.append(self.convertText(position.text))
@@ -68,7 +72,9 @@ class Loader: #class for generating datasets and labels from the gathered experi
             "Trial": trials,
             "Textures": label,
             "Positions": positions,
-            "Readings": readings
+            "Readings": readings,
+            "Speed": speeds,
+            "Angle":angles
         }
         df = pd.DataFrame(data)
         return df
