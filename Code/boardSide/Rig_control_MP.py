@@ -29,31 +29,31 @@ class Rig:
         self.motors=[self.kit1.stepper1,self.kit1.stepper2,self.kit2.stepper1,self.kit2.stepper2]
         #set up buttons
         # Define the pins for the buttons
-        button_pins = [Pin(4,machine.Pin.OUT), Pin(5,machine.Pin.OUT), Pin(6,machine.Pin.OUT), Pin(7,machine.Pin.OUT)] #arduino 2,3,4,5
-
+        button_pins = [Pin(2,machine.Pin.OUT), Pin(3,machine.Pin.OUT), Pin(1,machine.Pin.OUT), Pin(0,machine.Pin.OUT)] #arduino 2,3,4,5
+        
         # Initialize an array to hold the button objects
         self.buttons=button_pins
         #Initialise the plate
         self.plate=plate_mode
         if self.plate==1: #option one is normal plate
-            pins=[Pin(8,machine.Pin.OUT), Pin(9,machine.Pin.OUT), Pin(2,machine.Pin.OUT), Pin(3,machine.Pin.OUT)]
+            pins=[Pin(4,machine.Pin.OUT), Pin(5,machine.Pin.OUT), Pin(6,machine.Pin.OUT), Pin(7,machine.Pin.OUT)]
             self.sensor_plate=Foot(pins,Pin(26,machine.Pin.OUT),Pin(20,machine.Pin.OUT),alpha=0.2)
         elif self.plate==2: #plate is i2c
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.1)
-
     def resetRig(self):
         #move the rig till in the reset position
-        while sum(self.readButtons())>0: #loop till all pressed
-            states=[self.readButtons()[i]*1 for i in range(len(self.readButtons()))]
-            self.moveMotors(states[0],states[1],states[2],states[3]) #only move ones not pressed
+        while 0 in self.readButtons(): #loop till all pressed
+            states=[(1-self.readButtons()[i])*100 for i in range(len(self.readButtons()))]
+            self.moveMotors(states[2],states[3],states[1],states[0]) #only move ones not pressed
     def moveMotors(self,x,y,z,a,style=stepper.INTERLEAVE):
         #move each motor by each value
-        motors=[x,y,z,a]
+        motors=[z*-1,a*1,y*-1,x*1] #multiply by direction bias
+        actualDir=[0 if x >= 0 else -1 for x in [z,a,y,x]]
         directions=[stepper.BACKWARD if motors[i]<0 else stepper.FORWARD for i in range(len(motors))]
         motors=[abs(motors[i]) for i in range(len(motors))]
         for i in range(max(motors)): #schedule together
             for j in range(len(motors)):
-                if motors[j]>0:
+                if motors[j]>0 and (self.readButtons()[j]==0 or actualDir[j]==-1):
                     self.motors[j].onestep(direction=directions[j], style=style)
                     motors[j]-=1
     def readBase(self):
@@ -64,7 +64,7 @@ class Rig:
     def readButtons(self):
         states = []
         for button in self.buttons:
-            states.append(button.value)
+            states.append(button.value())
         return states
 
 class client:
@@ -73,3 +73,4 @@ class client:
     def send(self,message):
         print(f">{message}<")
     
+
