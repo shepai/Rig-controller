@@ -40,12 +40,14 @@ class Rig:
             self.sensor_plate=Foot(pins,Pin(26,machine.Pin.OUT),Pin(20,machine.Pin.OUT),alpha=0.2)
         elif self.plate==2: #plate is i2c
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.1)
-    def resetRig(self):
+    def resetRig(self,exclude=[1]):
         #move the rig till in the reset position
-        while 0 in self.readButtons(): #loop till all pressed
-            states=[(1-self.readButtons()[i])*100 for i in range(len(self.readButtons()))]
-            self.moveMotors(states[2],states[3],states[1],states[0]) #only move ones not pressed
-    def moveMotors(self,x,y,z,a,style=stepper.INTERLEAVE):
+        buttons=self.readButtons()
+        while 0 in [buttons[i] if i not in exclude else 1 for i in range(len(buttons))]: #loop till all pressed
+            states=[(1-buttons[i])*100 for i in range(len(buttons))]
+            self.moveMotors(states[3],states[2],states[0],states[1]) #only move ones not pressed
+            buttons=self.readButtons()
+    def moveMotors(self,x,y,z,a,style=stepper.DOUBLE):
         #move each motor by each value
         motors=[z*-1,a*1,y*-1,x*1] #multiply by direction bias
         actualDir=[0 if x >= 0 else -1 for x in [z,a,y,x]]
@@ -66,11 +68,11 @@ class Rig:
         for button in self.buttons:
             states.append(button.value())
         return states
+    def close(self):
+        pass
 
 class client:
     def listen_for_command(self,command=""): #listen for command from the data
         return command
     def send(self,message):
         print(f">{message}<")
-    
-
