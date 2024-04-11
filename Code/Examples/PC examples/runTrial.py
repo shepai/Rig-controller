@@ -33,7 +33,7 @@ def runTrial(SAVER,dirs=[0,0]):
         dirs[1]-=toMoveY
         data_sensor=["empty array to be replaced by sensor"] #TODO
         SAVER.upload(data_sensor,time.time()-t1,dirs+[0,0])
-    
+
 #####################
 #Experiment hyperparameters
 ####################
@@ -46,11 +46,12 @@ experiment=dx.Experiment(0,texture,80,20)
 for exp in range(num_experiments):
     experiment.create_experiment(exp,texture,angle,speed)
     for trial in range(num_of_trials): #gives you the ability to average over number of trials
+        print("Experiment",exp+1,"Trial",trial+1)
         for y in range(0,200,10): #move y along surface 
             for x in reversed(range(0,200,10)): #move direction of x along
                 experiment.create_trial()
                 runTrial(experiment,dirs=[x,y])
-
+                c.move(0,0,100,0)
         experiment.save(path_to_save)
 
 
