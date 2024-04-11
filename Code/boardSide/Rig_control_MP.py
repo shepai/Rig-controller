@@ -29,18 +29,18 @@ class Rig:
         self.motors=[self.kit1.stepper1,self.kit1.stepper2,self.kit2.stepper1,self.kit2.stepper2]
         #set up buttons
         # Define the pins for the buttons
-        button_pins = [Pin(2,machine.Pin.OUT), Pin(3,machine.Pin.OUT), Pin(1,machine.Pin.OUT), Pin(0,machine.Pin.OUT)] #arduino 2,3,4,5
+        button_pins = [Pin(2,machine.Pin.IN), Pin(3,machine.Pin.IN), Pin(1,machine.Pin.IN), Pin(0,machine.Pin.IN)] #arduino 2,3,4,5
         
         # Initialize an array to hold the button objects
         self.buttons=button_pins
         #Initialise the plate
         self.plate=plate_mode
         if self.plate==1: #option one is normal plate
-            pins=[Pin(4,machine.Pin.OUT), Pin(5,machine.Pin.OUT), Pin(6,machine.Pin.OUT), Pin(7,machine.Pin.OUT)]
-            self.sensor_plate=Foot(pins,Pin(26,machine.Pin.OUT),Pin(20,machine.Pin.OUT),alpha=0.2)
+            self.sensor_plate=Foot([12,11,10,9],26,alpha=0.4)
         elif self.plate==2: #plate is i2c
-           self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.1)
-    def resetRig(self,exclude=[1]):
+           self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.4)
+        self.memory={"x":-1500,"y":-6000,"z":0}
+    def reset(self,exclude=[1]):
         #move the rig till in the reset position
         buttons=self.readButtons()
         while 0 in [buttons[i] if i not in exclude else 1 for i in range(len(buttons))]: #loop till all pressed
@@ -49,7 +49,7 @@ class Rig:
             buttons=self.readButtons()
     def moveMotors(self,x,y,z,a,style=stepper.DOUBLE):
         #move each motor by each value
-        motors=[z*-1,a*1,y*-1,x*1] #multiply by direction bias
+        motors=[z*-1,a*1,y*1,x*1] #multiply by direction bias
         actualDir=[0 if x >= 0 else -1 for x in [z,a,y,x]]
         directions=[stepper.BACKWARD if motors[i]<0 else stepper.FORWARD for i in range(len(motors))]
         motors=[abs(motors[i]) for i in range(len(motors))]
@@ -68,6 +68,18 @@ class Rig:
         for button in self.buttons:
             states.append(button.value())
         return states
+    def lowerSensor(self,average=5000):
+        av=0
+        turns=0
+        while av<average:
+            self.moveMotors(0,0,-50,0)
+            read=self.readBase()
+            av=sum(read)/len(read)
+            print(av)
+            turns-=50
+        self.memory['z']=turns
+    def central(self):
+        self.moveMotors(self.memory['x'],self.memory['y'],self.memory['z'],0)
     def close(self):
         pass
 
@@ -76,3 +88,4 @@ class client:
         return command
     def send(self,message):
         print(f">{message}<")
+    
