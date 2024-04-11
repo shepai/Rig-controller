@@ -13,12 +13,12 @@ class Rig:
 
     I2C GP14 and GP15
     The buttons must be connceted to
-    GP4,GP5 GP6 and GP7 each corrosponding to axis x,y,z,a
+    GP0,GP1 GP2 and GP3 each corrosponding to axis x,y,z,a
     Stepper motors must be x to board 1 y to board 1 z to board 2 a to board 2
     The foot or pressure sensor should be connected either through:
         I2C on 14 and 15
         or
-        GP8, GP9, GP2, GP3 and the access pin to either ground or GP20
+        GP12, GP11, GP10, GP9 and the access pin to ground
     """
     def __init__(self,plate_mode=0):    
         #set up all i2c devices and motors
@@ -29,7 +29,7 @@ class Rig:
         self.motors=[self.kit1.stepper1,self.kit1.stepper2,self.kit2.stepper1,self.kit2.stepper2]
         #set up buttons
         # Define the pins for the buttons
-        button_pins = [Pin(2,machine.Pin.IN), Pin(3,machine.Pin.IN), Pin(1,machine.Pin.IN), Pin(0,machine.Pin.IN)] #arduino 2,3,4,5
+        button_pins = [Pin(2,machine.Pin.IN,Pin.PULL_DOWN), Pin(8,machine.Pin.IN,Pin.PULL_DOWN), Pin(1,machine.Pin.IN,Pin.PULL_DOWN), Pin(0,machine.Pin.IN,Pin.PULL_DOWN)] #arduino 2,3,4,5
         
         # Initialize an array to hold the button objects
         self.buttons=button_pins
@@ -39,7 +39,8 @@ class Rig:
             self.sensor_plate=Foot([12,11,10,9],26,alpha=0.4)
         elif self.plate==2: #plate is i2c
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.4)
-        self.memory={"x":-1500,"y":-6000,"z":0}
+        self.memory={"x":-1500,"y":-6000,"z":0,"cx":0,"cy":0,"cz":0,"ca":0}
+        self.inPosition=False
     def reset(self,exclude=[1]):
         #move the rig till in the reset position
         buttons=self.readButtons()
@@ -50,14 +51,21 @@ class Rig:
     def moveMotors(self,x,y,z,a,style=stepper.DOUBLE):
         #move each motor by each value
         motors=[z*-1,a*1,y*1,x*1] #multiply by direction bias
-        actualDir=[0 if x >= 0 else -1 for x in [z,a,y,x]]
+        actualDir=[1 if x >= 0 else -1 for x in [z,a,y,x]]
         directions=[stepper.BACKWARD if motors[i]<0 else stepper.FORWARD for i in range(len(motors))]
         motors=[abs(motors[i]) for i in range(len(motors))]
-        for i in range(max(motors)): #schedule together
+        keys=["cz","ca","cy","cx"]
+        top=max(motors)
+        buttons=[0,0,0,0]
+        for i in range(top): #schedule together
             for j in range(len(motors)):
-                if motors[j]>0 and (self.readButtons()[j]==0 or actualDir[j]==-1):
+                if i%2==0:#read every 2
+                    buttons=self.readButtons()
+                if motors[j]>0 and (buttons[j]==0 or actualDir[j]==-1):
                     self.motors[j].onestep(direction=directions[j], style=style)
                     motors[j]-=1
+                    if self.inPosition: #if moved to position track movements
+                        self.memory[keys[j]]-=actualDir[j]*1 #reverse direction to get back    
     def readBase(self):
         #read the force on rig
         if self.plate>0:
@@ -80,6 +88,7 @@ class Rig:
         self.memory['z']=turns
     def central(self):
         self.moveMotors(self.memory['x'],self.memory['y'],self.memory['z'],0)
+        self.inPosition=True
     def close(self):
         pass
 
@@ -89,3 +98,4 @@ class client:
     def send(self,message):
         print(f">{message}<")
     
+
