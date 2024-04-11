@@ -30,16 +30,51 @@ class Controller:
             except serial.serialutil.SerialTimeoutException:
                 print("serial issue")
         else: #micropython send command
-            if "RESET" in message:
-                self.COM.exec_raw_no_follow('reset()')
-            elif "MOVE:" in message:
-                com=message.replace("MOVE:","")
-                com=com.split(",")
-                self.COM.exec_raw_no_follow('move('+(com[0])+','+(com[1])+','+(com[2])+','+(com[3])+')')
-            elif "pressure" in message:
-                return self.COM.exec('pressure()').decode("utf-8").replace("\r\n","")
-    def reset(self):
-        self.sendCommand("RESET")
+            try:
+                if "RESET" in message:
+                    self.COM.exec('rig.reset()')
+                elif "CALIB" in message:
+                    self.COM.exec('rig.inPosition=True')
+                elif "BUTTONS" in message:
+                    b=self.COM.exec("print(rig.readButtons())").decode("utf-8").replace("\r\n","").replace("[","").replace("]","").replace(" ","")
+                    ar=[]
+                    for val in b.split(","):
+                        ar.append(int(val))
+                    return ar
+                elif "MOVE:" in message:
+                    com=message.replace("MOVE:","")
+                    com=com.split(",")
+                    self.COM.exec('move('+(com[0])+','+(com[1])+','+(com[2])+','+(com[3])+')')
+                elif "pressure" in message:
+                    return self.COM.exec('pressure()').decode("utf-8").replace("\r\n","")
+                elif "getmove" in message: #get all the rig values
+                    b=self.COM.exec('print([rig.memory[key] for key in ["x","y","z","cx","cy","cz"]])').decode("utf-8").replace("\r\n","").replace("[","").replace("]","").replace(" ","")
+                    ar=[]
+                    for val in b.split(","):
+                        ar.append(int(val))
+                    return ar
+                elif "setmove" in message: #reset the values to be 0
+                    for key in ["cx","cy","cz"]:
+                        self.COM.exec("rig.memory["+key+"]=0")
+            except pyboard.PyboardError as e:
+                pass
+    def reset(self,exclude=[1]):
+        #self.sendCommand("RESET")
+        buttons=self.sendCommand("BUTTONS")
+        while 0 in [buttons[i] if i not in exclude else 1 for i in range(len(buttons))]: #loop till all pressed
+            states=[(1-buttons[i])*100 for i in range(len(buttons))]
+            self.move(states[3],states[2],states[0],states[1]) #only move ones not pressed
+            buttons=self.sendCommand("BUTTONS")
+    def calibrate(self):
+        self.reset()
+        #use the movement coords to get to point
+        movements=self.sendCommand("getmove")[0:3]
+        for i in range(15):
+            self.sendCommand("MOVE:-100,-100,0,0")
+        for i in range(45):
+            self.sendCommand("MOVE:0,-100,0,0")
+        self.sendCommand("CALIB")
+        print("Calibration done")
     def move(self,x,y,z,a):
         #move the rig by these amounts
         self.sendCommand("MOVE:"+str(x)+","+str(y)+","+str(z)+","+str(a))
