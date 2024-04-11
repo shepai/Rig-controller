@@ -52,7 +52,7 @@ for exp in range(num_experiments):
                 experiment.create_trial()
                 runTrial(experiment,dirs=[x,y])
                 c.move(0,0,100,0)
-        experiment.save(path_to_save)
+            experiment.save(path_to_save) #constant backups
 
 
 
