@@ -56,8 +56,14 @@ class Controller:
                 elif "setmove" in message: #reset the values to be 0
                     for key in ["cx","cy","cz"]:
                         self.COM.exec("rig.memory["+key+"]=0")
+                elif "lower" in message: #lower sensor on to base
+                    average=message.replace("lower=","")
+                    self.COM.exec_raw_no_follow("rig.lowerSensor("+str(average)+")")
             except pyboard.PyboardError as e:
                 pass
+    def reset_trial(self):
+        movements=self.sendCommand("getmove")[3:]
+        self.move(*movements,0)
     def reset(self,exclude=[1]):
         #self.sendCommand("RESET")
         buttons=self.sendCommand("BUTTONS")
@@ -68,11 +74,12 @@ class Controller:
     def calibrate(self):
         self.reset()
         #use the movement coords to get to point
-        movements=self.sendCommand("getmove")[0:3]
+        #the movements are preset to match those in self.sendCommand("getmove")[0:3]
         for i in range(15):
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
+        self.sendCommand("lower=5000")
         self.sendCommand("CALIB")
         print("Calibration done")
     def move(self,x,y,z,a):
