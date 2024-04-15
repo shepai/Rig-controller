@@ -48,6 +48,7 @@ for exp in range(num_experiments):
     experiment.create_experiment(exp,texture,angle,speed)
     for trial in range(num_of_trials): #gives you the ability to average over number of trials
         print("Experiment",exp+1,"Trial",trial+1)
+        print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes")
         for y in np.arange(0,1,0.1): #move y along surface 
             for x in reversed(np.arange(0,1,0.1)): #move direction of x along
                 experiment.create_trial()
@@ -56,4 +57,4 @@ for exp in range(num_experiments):
             experiment.save(path_to_save) #constant backups
 
 
-print("EXECUTION TIME:",time.time()-starttime)
+print("TOTAL EXECUTION TIME:",(time.time()-starttime)/(60*60),"hours")
