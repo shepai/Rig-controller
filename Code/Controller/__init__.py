@@ -79,7 +79,7 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
-        self.sendCommand("lower=5000")
+        self.sendCommand("lower=5700")
         self.sendCommand("CALIB")
         print("Calibration done")
     def move(self,x,y,z,a):
