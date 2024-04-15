@@ -7,9 +7,10 @@ import time
 import Controller
 import DataLogger.data_xml as dx
 import TactileSensor as ts
+import numpy as np
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_trial_one"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_baseline"
 c= Controller.Controller('COM19',file=path)
 c.calibrate() #takes a while - only want to do once
 #####################
@@ -17,25 +18,21 @@ c.calibrate() #takes a while - only want to do once
 ####################
 B=ts.Board()
 #get serial boards and connect to first one
-B.autoConnect(file="C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
+print("Connecting to sensor")
+B.connect("COM24")
+B.runFile("C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
+#B.autoConnect(file="C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
 
 def runTrial(SAVER,dirs=[0,0]):
     c.reset_trial() #return to center position
     #move sensor across surface
-    toMoveX=0
-    toMoveY=0
     t1=time.time()
-    for i in range(max(dirs)):
-        #prevent negative
-        if dirs[0]>0: toMoveX=min(dirs[0],10)
-        else: toMoveX=0
-        if dirs[1]>0: toMoveY=min(dirs[1],10)
-        else: toMoveY=0
-        c.move(toMoveX,toMoveY,0,0)
-        #reduce by step
-        dirs[0]-=toMoveX
-        dirs[1]-=toMoveY
-        data_sensor=["empty array to be replaced by sensor"] #TODO
+    x_vector=10*dirs[0]
+    y_vector=10*dirs[1]
+    print("vector",x_vector,y_vector)
+    for i in range(0,100):
+        c.move(x_vector,y_vector,0,0)
+        data_sensor=list(B.getSensor(type_="round",num=16))
         SAVER.upload(data_sensor,time.time()-t1,dirs+[0,0])
 
 #####################
@@ -51,10 +48,10 @@ for exp in range(num_experiments):
     experiment.create_experiment(exp,texture,angle,speed)
     for trial in range(num_of_trials): #gives you the ability to average over number of trials
         print("Experiment",exp+1,"Trial",trial+1)
-        for y in range(0,200,10): #move y along surface 
-            for x in reversed(range(0,200,10)): #move direction of x along
+        for y in np.arange(0,1,0.05): #move y along surface 
+            for x in reversed(np.arange(0,1,0.05)): #move direction of x along
                 experiment.create_trial()
-                runTrial(experiment,dirs=[x,y])
+                runTrial(experiment,dirs=[x,y]) #send vector through
                 c.move(0,0,100,0)
             experiment.save(path_to_save) #constant backups
 
