@@ -39,8 +39,9 @@ class Rig:
             self.sensor_plate=Foot([12,11,10,9],26,alpha=0.4)
         elif self.plate==2: #plate is i2c
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.4)
-        self.memory={"x":-1500,"y":-6000,"z":0,"cx":0,"cy":0,"cz":0,"ca":0}
+        self.memory={"x":-1000,"y":-6000,"z":0,"cx":0,"cy":0,"cz":0,"ca":0}
         self.inPosition=False
+        self.zero()
     def reset(self,exclude=[1]):
         #move the rig till in the reset position
         buttons=self.readButtons()
@@ -79,10 +80,14 @@ class Rig:
     def lowerSensor(self,average=5000):
         av=0
         turns=0
+        alpha=0.5
+        read=self.readBase()
+        last_av=(sum(read)/len(read))
         while av<average:
             self.moveMotors(0,0,-50,0)
             read=self.readBase()
-            av=sum(read)/len(read)
+            av=(sum(read)/len(read))*alpha + (1-alpha)*last_av
+            last_av=av
             print(av)
             turns-=50
         self.memory['z']=turns
@@ -91,11 +96,16 @@ class Rig:
         self.inPosition=True
     def close(self):
         pass
+    def zero(self):
+        nums=0
+        for i in range(250):
+            plate=self.readBase()
+            nums+=(sum(plate)/len(plate))
+        nums/=250
+        self.zero_fact=nums
 
 class client:
     def listen_for_command(self,command=""): #listen for command from the data
         return command
     def send(self,message):
         print(f">{message}<")
-    
-
