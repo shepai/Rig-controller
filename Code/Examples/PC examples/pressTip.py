@@ -10,9 +10,10 @@ import TactileSensor as ts
 import numpy as np
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P120"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P180"
 c= Controller.Controller('COM19',file=path)
 c.calibrate() #takes a while - only want to do once
+#c.sendCommand("CALIB") #do if already calibrated
 #####################
 # Set up secondary sensor
 ####################
@@ -20,8 +21,9 @@ B=ts.Board()
 #get serial boards and connect to first one
 print("Connecting to sensor")
 B.connect("COM24")
+print("Running file")
 B.runFile("C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
-#B.autoConnect(file="C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
+print("File ran")
 
 def runTrial(SAVER,dirs=[0,0]):
     c.reset_trial() #return to center position
@@ -32,7 +34,7 @@ def runTrial(SAVER,dirs=[0,0]):
     for i in range(0,100):
         c.move(x_vector,y_vector,0,0)
         data_sensor=list(B.getSensor(type_="round",num=16))
-        SAVER.upload(data_sensor,time.time()[x_vector+i,y_vector+i]+[0,0])
+        SAVER.upload(data_sensor,time.time(),[x_vector+i,y_vector+i]+[0,0])
 
 #####################
 #Experiment hyperparameters
@@ -50,8 +52,8 @@ for exp in range(num_experiments):
     for trial in range(num_of_trials): #gives you the ability to average over number of trials
         print("Experiment",exp+1,"Trial",trial+1)
         total_operations_left=(num_experiments-exp)*(num_of_trials-trial)
-        time_taken=(time.time()-starttime)/(total_operations-total_operations_left)
-        print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",time_taken*total_operations_left)
+        time_taken=(time.time()-starttime)/max(total_operations-total_operations_left,0.001)
+        print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",(time_taken*total_operations_left)/(60),"minutes")
         for y in np.arange(0,1,0.1): #move y along surface 
             for x in reversed(np.arange(0,1,0.1)): #move direction of x along
                 experiment.create_trial()
