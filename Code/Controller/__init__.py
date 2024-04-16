@@ -59,6 +59,8 @@ class Controller:
                 elif "lower" in message: #lower sensor on to base
                     average=message.replace("lower=","")
                     self.COM.exec_raw_no_follow("rig.lowerSensor("+str(average)+")")
+                elif "ZERO" in message:
+                    self.COM.exec_raw_no_follow("rig.zero()")
             except pyboard.PyboardError as e:
                 pass
     def reset_trial(self):
@@ -79,7 +81,8 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
-        self.sendCommand("lower=5700")
+        self.sendCommand("lower=6100")
+        print("Lowered to point")
         self.sendCommand("CALIB")
         print("Calibration done")
     def move(self,x,y,z,a):
