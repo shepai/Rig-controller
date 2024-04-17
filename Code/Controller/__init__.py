@@ -81,7 +81,7 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
-        self.sendCommand("lower=6100")
+        self.sendCommand("lower=8000")
         print("Lowered to point")
         self.sendCommand("CALIB")
         print("Calibration done")
