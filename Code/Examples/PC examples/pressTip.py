@@ -10,7 +10,7 @@ import TactileSensor as ts
 import numpy as np
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P180"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40_1"
 c= Controller.Controller('COM19',file=path)
 c.calibrate() #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
@@ -40,11 +40,11 @@ def runTrial(SAVER,dirs=[0,0]):
 #Experiment hyperparameters
 ####################
 num_experiments=1
-num_of_trials=20
+num_of_trials=8
 angle=0
 speed=100
-texture="none"
-experiment=dx.Experiment(0,texture,80,20)
+texture="C40"
+experiment=dx.Experiment(0,texture,angle,speed)
 starttime=time.time()
 total_operations=num_of_trials*num_experiments
 for exp in range(num_experiments):
