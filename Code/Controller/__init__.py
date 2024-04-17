@@ -73,7 +73,7 @@ class Controller:
             states=[(1-buttons[i])*100 for i in range(len(buttons))]
             self.move(states[3],states[2],states[0],states[1]) #only move ones not pressed
             buttons=self.sendCommand("BUTTONS")
-    def calibrate(self):
+    def calibrate(self,value=7500):
         self.reset()
         #use the movement coords to get to point
         #the movements are preset to match those in self.sendCommand("getmove")[0:3]
@@ -81,7 +81,7 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
-        self.sendCommand("lower=8000")
+        self.sendCommand("lower="+str(value))
         print("Lowered to point")
         self.sendCommand("CALIB")
         print("Calibration done")
