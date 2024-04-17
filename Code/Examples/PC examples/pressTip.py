@@ -8,11 +8,12 @@ import Controller
 import DataLogger.data_xml as dx
 import TactileSensor as ts
 import numpy as np
+import matplotlib.pyplot as plt
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40_1"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40_2"
 c= Controller.Controller('COM19',file=path)
-c.calibrate() #takes a while - only want to do once
+c.calibrate(value=7500) #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
 #####################
 # Set up secondary sensor
@@ -24,8 +25,9 @@ B.connect("COM24")
 print("Running file")
 B.runFile("C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
 print("File ran")
-
+sensor=[]
 def runTrial(SAVER,dirs=[0,0]):
+    global sensor
     c.reset_trial() #return to center position
     #move sensor across surface
     t1=time.time()
@@ -35,6 +37,12 @@ def runTrial(SAVER,dirs=[0,0]):
         c.move(x_vector,y_vector,0,0)
         data_sensor=list(B.getSensor(type_="round",num=16))
         SAVER.upload(data_sensor,time.time(),[x_vector+i,y_vector+i]+[0,0])
+        sensor.append(data_sensor)
+        if len(sensor)>200:
+            sensor.pop(0)
+        plt.plot(sensor)
+        plt.title("Live stream from sensor")
+        plt.pause(0.01)
 
 #####################
 #Experiment hyperparameters
@@ -56,9 +64,15 @@ for exp in range(num_experiments):
         print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",(time_taken*total_operations_left)/(60),"minutes")
         for y in np.arange(0,1,0.1): #move y along surface 
             for x in reversed(np.arange(0,1,0.1)): #move direction of x along
-                experiment.create_trial()
-                runTrial(experiment,dirs=[x,y]) #send vector through
-                c.move(0,0,500,0)
+                try:
+                    experiment.create_trial()
+                    runTrial(experiment,dirs=[x,y]) #send vector through
+                    c.move(0,0,500,0)
+                except KeyboardInterrupt:
+                    c.reset_trial()
+                    c.move(0,0,1000,0)
+                    print("Paused... do you want to continue (ENTER yes ctrl-C no)")
+                    input(">")
             experiment.save(path_to_save) #constant backups
 
 
