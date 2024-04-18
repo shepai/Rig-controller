@@ -11,9 +11,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40_2"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40"
 c= Controller.Controller('COM19',file=path)
-c.calibrate(value=7500) #takes a while - only want to do once
+THRESH=5800
+c.calibrate(value=THRESH) #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
 #####################
 # Set up secondary sensor
@@ -29,6 +30,7 @@ sensor=[]
 def runTrial(SAVER,dirs=[0,0]):
     global sensor
     c.reset_trial() #return to center position
+    c.move(0,50,50,0)
     #move sensor across surface
     t1=time.time()
     x_vector=10*dirs[0]
@@ -38,12 +40,13 @@ def runTrial(SAVER,dirs=[0,0]):
         data_sensor=list(B.getSensor(type_="round",num=16))
         SAVER.upload(data_sensor,time.time(),[x_vector+i,y_vector+i]+[0,0])
         sensor.append(data_sensor)
-        if len(sensor)>200:
+        if len(sensor)>100: #prevent too many values
             sensor.pop(0)
-        plt.plot(sensor)
-        plt.title("Live stream from sensor")
-        plt.pause(0.01)
-
+        #plt.cla()
+        #plt.plot(sensor) #show sensor 
+        #plt.title("Live stream from sensor")
+        #plt.pause(0.009)
+    #plt.cla()
 #####################
 #Experiment hyperparameters
 ####################
@@ -75,5 +78,5 @@ for exp in range(num_experiments):
                     input(">")
             experiment.save(path_to_save) #constant backups
 
-
+#plt.show()
 print("TOTAL EXECUTION TIME:",(time.time()-starttime)/(60*60),"hours")
