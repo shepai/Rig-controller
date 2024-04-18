@@ -54,17 +54,26 @@ class Controller:
                         ar.append(int(val))
                     return ar
                 elif "setmove" in message: #reset the values to be 0
-                    for key in ["cx","cy","cz"]:
+                    keys=["cx","cy","cz"]
+                    if "setmove1" in message: keys=["cx","cy"] #dont reset all
+                    for key in keys:
                         self.COM.exec("rig.memory["+key+"]=0")
                 elif "lower" in message: #lower sensor on to base
-                    average=message.replace("lower=","")
+                    average=message.replace("lower=","") 
                     self.COM.exec_raw_no_follow("rig.lowerSensor("+str(average)+")")
                 elif "ZERO" in message:
                     self.COM.exec_raw_no_follow("rig.zero()")
+                elif "DIST" in message:
+                    return float(self.COM.exec('rig.getSensor()').decode("utf-8").replace("\r\n",""))
+                elif "centre" in message:
+                    self.COM.exec_raw_no_follow("rig.centre()")
+                elif "perfect" in message:
+                    self.COM.exec_raw_no_follow("rig.setPerfect()")
             except pyboard.PyboardError as e:
                 pass
     def reset_trial(self):
         movements=self.sendCommand("getmove")[3:]
+        self.sendCommand("centre")
         self.move(*movements,0)
     def reset(self,exclude=[1]):
         #self.sendCommand("RESET")
@@ -73,7 +82,7 @@ class Controller:
             states=[(1-buttons[i])*100 for i in range(len(buttons))]
             self.move(states[3],states[2],states[0],states[1]) #only move ones not pressed
             buttons=self.sendCommand("BUTTONS")
-    def calibrate(self,value=7500):
+    def calibrate(self,value=7500,lower=True):
         self.reset()
         #use the movement coords to get to point
         #the movements are preset to match those in self.sendCommand("getmove")[0:3]
@@ -81,9 +90,14 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
-        self.sendCommand("lower="+str(value))
-        print("Lowered to point")
+        self.sendCommand("setmove")
+        if lower:
+            self.sendCommand("lower="+str(value))
+            print("Lowered to point")
+        else:
+            self.reset_trial()
         self.sendCommand("CALIB")
+        self.sendCommand("centre")
         print("Calibration done")
     def move(self,x,y,z,a):
         #move the rig by these amounts
