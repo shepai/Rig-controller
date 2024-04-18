@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40_3"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/TacTip_P40"
 c= Controller.Controller('COM19',file=path)
 c.calibrate(value=6100) #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
