@@ -106,7 +106,7 @@ class Rig:
     def centre(self):
         reading=self.getSensor()
         dist=reading-self.memory["dist"]
-        while dist>1.5:
+        while abs(dist)>1.5:
             if dist>0: #move one way
                 self.moveMotors(0,-10,0,0)
             else: #move other
