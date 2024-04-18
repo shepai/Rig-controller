@@ -6,6 +6,7 @@ from machine import Pin
 import machine
 import time
 from Tactile_MP import Foot #found on my github
+import hcsr04
 
 class Rig:
     """
@@ -39,9 +40,14 @@ class Rig:
             self.sensor_plate=Foot([12,11,10,9],26,alpha=0.4)
         elif self.plate==2: #plate is i2c
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.4)
-        self.memory={"x":-1000,"y":-5200,"z":0,"cx":0,"cy":0,"cz":0,"ca":0}
+        self.memory={"x":-1000,"y":-5200,"z":0,"cx":0,"cy":0,"cz":0,"ca":0,"dist":9}
         self.inPosition=False
         self.zero()
+        trigger_pin = Pin(4, Pin.OUT)  # Change this to the pin connected to the trigger
+        echo_pin = Pin(3, Pin.IN)      # Change this to the pin connected to the echo
+
+        # Initialize the ultrasonic sensor
+        self.sensor = hcsr04.HCSR04(trigger_pin, echo_pin)
     def reset(self,exclude=[1]):
         #move the rig till in the reset position
         buttons=self.readButtons()
@@ -49,6 +55,10 @@ class Rig:
             states=[(1-buttons[i])*100 for i in range(len(buttons))]
             self.moveMotors(states[3],states[2],states[0],states[1]) #only move ones not pressed
             buttons=self.readButtons()
+    def getSensor(self):
+        d=self.sensor.distance_cm()
+        print(d)
+        return d
     def moveMotors(self,x,y,z,a,style=stepper.DOUBLE):
         #move each motor by each value
         motors=[z*-1,a*1,y*1,x*1] #multiply by direction bias
@@ -91,8 +101,23 @@ class Rig:
             print(av)
             turns-=50
         self.memory['z']=turns
+    def setPerfect(self):
+        self.memory['dist']=self.getSensor()
+    def centre(self):
+        reading=self.getSensor()
+        dist=reading-self.memory["dist"]
+        while dist>1.5:
+            if dist>0: #move one way
+                self.moveMotors(0,-10,0,0)
+            else: #move other
+                self.moveMotors(0,10,0,0)
+            reading=self.getSensor()
+            dist=reading-self.memory["dist"]
+        
     def central(self):
         self.moveMotors(self.memory['x'],self.memory['y'],self.memory['z'],0)
+        #extra movement
+        self.centre()
         self.inPosition=True
     def close(self):
         pass
