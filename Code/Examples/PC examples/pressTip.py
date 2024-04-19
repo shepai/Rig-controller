@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
 path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40"
 c= Controller.Controller('COM19',file=path)
-THRESH=5800
+THRESH=5500
 c.calibrate(value=THRESH) #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
 #####################
@@ -51,7 +51,7 @@ def runTrial(SAVER,dirs=[0,0]):
 #Experiment hyperparameters
 ####################
 num_experiments=1
-num_of_trials=8
+num_of_trials=5
 angle=0
 speed=100
 texture="C40"
