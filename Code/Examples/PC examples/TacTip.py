@@ -43,7 +43,7 @@ def runTrial(SAVER,dirs=[0,0]):
         if not ret:
             print("incorrect")
             frame=np.zeros((100,100,1))
-        data_sensor=list(frame.shape)
+        data_sensor=list(frame.flatten)
         SAVER.upload(data_sensor,time.time(),[x_vector+i,y_vector+i]+[0,0])
         sensor.append(data_sensor)
         if len(sensor)>100: #prevent too many values
