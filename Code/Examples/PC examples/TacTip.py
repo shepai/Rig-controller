@@ -9,9 +9,21 @@ import DataLogger.data_xml as dx
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/TacTip_Flat_P10"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/"
+name="TacTip_Flat_P10"
+path_ = os.path.join(path_to_save, name) 
+try:
+    os.remove(path_)
+except:
+    pass
+try:
+    os.mkdir(path_) 
+except:
+    pass
+path_to_save=path_to_save+name+"/"+name
 c= Controller.Controller('COM19',file=path)
 THRESH=6000
 Pressure_extra=0
@@ -31,12 +43,14 @@ print("COMPONENTS",frame.shape)
 sensor=[]
 def runTrial(SAVER,dirs=[0,0]):
     global sensor
+    global filename
     c.reset_trial() #return to center position
     c.move(EDGE_VALUE+0,50,50-FORCE,0)
     #move sensor across surface
     t1=time.time()
     x_vector=10*dirs[0]
     y_vector=10*dirs[1]
+    ar=[]
     for i in range(0,100):
         c.move(x_vector,y_vector,0,0)
         ret, frame = cap.read()
@@ -44,7 +58,8 @@ def runTrial(SAVER,dirs=[0,0]):
             print("incorrect")
             frame=np.zeros((100,100,1))
         data_sensor=list(frame.flatten())
-        SAVER.upload(data_sensor,time.time(),[x_vector+i,y_vector+i]+[0,0])
+        ar.append(data_sensor)
+        SAVER.upload(filename,time.time(),[x_vector+i,y_vector+i]+[0,0])
         sensor.append(data_sensor)
         if len(sensor)>100: #prevent too many values
             sensor.pop(0)
@@ -52,6 +67,8 @@ def runTrial(SAVER,dirs=[0,0]):
         # Check for the 'q' key to exit the loop
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    ar=np.array(ar)
+    np.savez_compressed(path_to_save+"_"+filename,ar)
 #####################
 #Experiment hyperparameters
 ####################
@@ -77,6 +94,7 @@ for exp in range(num_experiments):
             for x in reversed(np.arange(0,1,0.1)): #move direction of x along
                 try:
                     experiment.create_trial()
+                    filename=str(trial)+"-"+str(y)+"-"+str(x)
                     runTrial(experiment,dirs=[x,y]) #send vector through
                     c.move(0,0,500,0)
                 except KeyboardInterrupt:
