@@ -40,7 +40,7 @@ class Rig:
             self.sensor_plate=Foot([12,11,10,9],26,alpha=0.4)
         elif self.plate==2: #plate is i2c
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.4)
-        self.memory={"x":-1000,"y":-5200,"z":0,"cx":0,"cy":0,"cz":0,"ca":0,"dist":9}
+        self.memory={"x":-1000,"y":-5200,"z":0,"a":0,"cx":0,"cy":0,"cz":0,"ca":0,"dist":9}
         self.inPosition=False
         self.zero()
         trigger_pin = Pin(4, Pin.OUT)  # Change this to the pin connected to the trigger
