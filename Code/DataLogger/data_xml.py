@@ -1,11 +1,13 @@
 import xml.etree.ElementTree as ET
 import pandas as pd
+import numpy as np
 
 class Experiment:
-    def __init__(self,ID,texture,angle,speed):
+    def __init__(self,ID,texture,angle,speed,onBoot=False):
         # Create the root element
         self.dataset=ET.Element("Dataset")
-        self.create_experiment(ID,texture,angle,speed)
+        if onBoot:
+            self.create_experiment(ID,texture,angle,speed)
     def save(self,name): # Save the file
         name=name.replace(".xml","")
         tree = ET.ElementTree(self.dataset)
@@ -46,9 +48,9 @@ class Loader: #class for generating datasets and labels from the gathered experi
         data=data.split(",")
         ints=[]
         for entry in data:
-            ints.append(int(entry))
+            ints.append(float(entry))
         return ints
-    def getByExperiment(self):
+    def getByExperiment(self,convert=True):
         label=[]
         angles=[]
         speeds=[]
@@ -64,8 +66,12 @@ class Loader: #class for generating datasets and labels from the gathered experi
                         angles.append(exp.get("Angle"))
                         speeds.append(exp.get("Speed"))
                         label.append(exp.get("Texture"))
-                        readings.append(self.convertText(data.text))
-                        positions.append(self.convertText(position.text))
+                        if convert:
+                            readings.append(np.array(self.convertText(data.text)))
+                            positions.append(self.convertText(position.text))
+                        else:
+                            readings.append(data.text)
+                            positions.append(position.text)
                         times.append(reading.get("Time"))
                     
         data = {
@@ -87,9 +93,10 @@ class Loader: #class for generating datasets and labels from the gathered experi
     def getByDirection(self):
         pass
 
-loader=Loader("C:/Users/dexte/Documents/GitHub/Rig-controller/Code/DataLogger/test.xml")
+"""loader=Loader("C:/Users/dexte/Documents/GitHub/Rig-controller/Code/DataLogger/test.xml")
 frame=loader.getByExperiment()
-print(frame)
+print(frame)"""
+
 """test=Experiment(1,"ss",80,20)
 test.create_trial()
 test.upload([0,1,1,0],0.1,[1,2,3])
