@@ -79,7 +79,7 @@ speed=100
 texture="Plastic"
 experiment=dx.Experiment(0,texture,angle,speed)
 starttime=time.time()
-total_operations=num_of_trials*num_experiments
+total_operations=(num_of_trials*(len(np.arange(0,1,0.1))**2))*num_experiments
 EDGE_VALUE=0
 FORCE=30 #0, 10, 20, 30, 40, 50, 60, 70, 80 ,90
 
