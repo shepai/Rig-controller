@@ -10,10 +10,10 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-
+clear = lambda: os.system('cls')
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
 path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/"
-name="TacTip_Flat_P10"
+name="TacTip_Flat_P30"
 path_ = os.path.join(path_to_save, name) 
 try:
     os.remove(path_)
@@ -73,7 +73,7 @@ def runTrial(SAVER,dirs=[0,0]):
 #Experiment hyperparameters
 ####################
 num_experiments=1
-num_of_trials=3
+num_of_trials=2
 angle=0
 speed=100
 texture="Plastic"
@@ -81,17 +81,20 @@ experiment=dx.Experiment(0,texture,angle,speed)
 starttime=time.time()
 total_operations=num_of_trials*num_experiments
 EDGE_VALUE=0
-FORCE=10 #0, 10, 20, 30, 40, 50, 60, 70, 80 ,90
+FORCE=30 #0, 10, 20, 30, 40, 50, 60, 70, 80 ,90
 
 for exp in range(num_experiments):
     experiment.create_experiment(exp,texture,angle,speed)
     for trial in range(num_of_trials): #gives you the ability to average over number of trials
         print("Experiment",exp+1,"Trial",trial+1)
         total_operations_left=(num_experiments-exp)*(num_of_trials-trial)
-        time_taken=(time.time()-starttime)/max(total_operations-total_operations_left,0.001)
-        print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",(time_taken*total_operations_left)/(60),"minutes")
+        
         for y in np.arange(0,1,0.1): #move y along surface 
             for x in reversed(np.arange(0,1,0.1)): #move direction of x along
+                total_operations_left=(num_experiments-exp)*(num_of_trials-trial)*(len(reversed(np.arange(0,1,0.1)))*(len(np.arange(0,1,0.1))-y))
+                time_taken=(time.time()-starttime)/max(total_operations-total_operations_left,0.001)
+                print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",(time_taken*total_operations_left)/(60),"minutes")
+                clear()
                 try:
                     experiment.create_trial()
                     filename=str(trial)+"-"+str(y)+"-"+str(x)
