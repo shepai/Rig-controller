@@ -11,9 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P40"
+path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P120"
 c= Controller.Controller('COM19',file=path)
-THRESH=5500
+THRESH=6000
 c.calibrate(value=THRESH) #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
 #####################
@@ -35,9 +35,10 @@ def runTrial(SAVER,dirs=[0,0]):
     t1=time.time()
     x_vector=10*dirs[0]
     y_vector=10*dirs[1]
+    time.sleep(0.5)
     for i in range(0,100):
-        c.move(x_vector,y_vector,0,0)
         data_sensor=list(B.getSensor(type_="round",num=16))
+        c.move(x_vector,y_vector,0,0)
         SAVER.upload(data_sensor,time.time(),[x_vector+i,y_vector+i]+[0,0])
         sensor.append(data_sensor)
         if len(sensor)>100: #prevent too many values
