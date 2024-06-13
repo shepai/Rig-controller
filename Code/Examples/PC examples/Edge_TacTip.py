@@ -49,7 +49,7 @@ def Experiment(name,FORCE):
     for exp in range(num_experiments):
         experiment.create_experiment(exp,texture,angle,speed)
         for trial in range(num_of_trials): #gives you the ability to average over number of trials
-            total_operations_left=(num_experiments-exp)*(num_of_trials-trial)
+            experiment.create_trial()
             #for rotation in range(0,100,20):
                 #c.move(0,0,0,rotation) #0,-3000,-100,0
             ar=[]
@@ -67,7 +67,7 @@ def Experiment(name,FORCE):
                     break
                 data_sensor=list(frame.flatten())
                 ar.append(data_sensor)
-                print("record",30+(2*i),"% on edge")
+                #print("record",30+(2*i),"% on edge")
                 time.sleep(1)
                 #move up and along
                 c.move(0,20,(200+FORCE),0) 
@@ -78,7 +78,6 @@ def Experiment(name,FORCE):
             filename=str(trial)+"-"+str(i)
             np.savez_compressed(path_to_save+"_"+filename,ar)
             experiment.upload(filename,time.time(),[0,0]+[0,0])
-        experiment.save(path_to_save) #constant backups
-                
+        experiment.save(path_to_save) #constant backups       
 
 Experiment("test",0)
