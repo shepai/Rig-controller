@@ -71,9 +71,9 @@ class Controller:
                     self.COM.exec_raw_no_follow("rig.setPerfect()")
             except pyboard.PyboardError as e:
                 pass
-    def reset_trial(self):
+    def reset_trial(self,centering=True):
         movements=self.sendCommand("getmove")[3:]
-        self.sendCommand("centre")
+        if centering: self.sendCommand("centre")
         self.move(*movements,0)
     def reset(self,exclude=[1]):
         #self.sendCommand("RESET")
@@ -90,6 +90,8 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         for i in range(45):
             self.sendCommand("MOVE:0,-100,0,0")
+        for i in range(4):
+            self.sendCommand("MOVE:-100,-100,0,0")
         self.sendCommand("setmove")
         if lower:
             self.sendCommand("lower="+str(value))
