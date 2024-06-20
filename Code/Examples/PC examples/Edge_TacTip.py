@@ -78,6 +78,6 @@ def Experiment(name,FORCE):
             filename=str(trial)+"-"+str(i)
             np.savez_compressed(path_to_save+"_"+filename,ar)
             experiment.upload(filename,time.time(),[0,0]+[0,0])
-        experiment.save(path_to_save) #constant backups       
+            experiment.save(path_to_save) #constant backups       
 
-Experiment("test",0)
+#Experiment("test",0)
