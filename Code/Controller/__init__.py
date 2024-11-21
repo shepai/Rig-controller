@@ -1,6 +1,16 @@
 import time
 import serial
 from mpremote import pyboard
+import subprocess
+
+def disconnect_from_device(COM):
+    # Make sure to properly close the connection and release the serial port
+    try:
+
+        COM.exit_raw_repl()  # Ensure the REPL is exited
+        COM.close()  # Close the serial connection properly
+    except Exception as e:
+        print(f"Error during disconnect: {e}")
 
 class Controller:
     def __init__(self,COM,variant="micropython",file=""):
@@ -12,6 +22,9 @@ class Controller:
             self.COM.enter_raw_repl() #open for commands
             self.COM.execfile(file)
             print("Successfully connected")
+            
+        self.file=file
+        self.COM_=COM
     def listen_for_data(self):
         #keep searching till client pings back
         if self.variant=="circuitpython":
@@ -24,53 +37,67 @@ class Controller:
             return value.replace(">","").replace("<","")
         raise SystemError("Need to be on circuitpython mode for this to work")
     def sendCommand(self,message):
-        if self.variant=="circuitpython":
-            try:
-                self.ser.write((message+"\n").encode())
-            except serial.serialutil.SerialTimeoutException:
-                print("serial issue")
-        else: #micropython send command
-            try:
-                if "RESET" in message:
-                    self.COM.exec('rig.reset()')
-                elif "CALIB" in message:
-                    self.COM.exec('rig.inPosition=True')
-                elif "BUTTONS" in message:
-                    b=self.COM.exec("print(rig.readButtons())").decode("utf-8").replace("\r\n","").replace("[","").replace("]","").replace(" ","")
-                    ar=[]
-                    for val in b.split(","):
-                        ar.append(int(val))
-                    return ar
-                elif "MOVE:" in message:
-                    com=message.replace("MOVE:","")
-                    com=com.split(",")
-                    self.COM.exec('move('+(com[0])+','+(com[1])+','+(com[2])+','+(com[3])+')')
-                elif "pressure" in message:
-                    return self.COM.exec('pressure()').decode("utf-8").replace("\r\n","")
-                elif "getmove" in message: #get all the rig values
-                    b=self.COM.exec('print([rig.memory[key] for key in ["x","y","z","cx","cy","cz"]])').decode("utf-8").replace("\r\n","").replace("[","").replace("]","").replace(" ","")
-                    ar=[]
-                    for val in b.split(","):
-                        ar.append(int(val))
-                    return ar
-                elif "setmove" in message: #reset the values to be 0
-                    keys=["cx","cy","cz"]
-                    if "setmove1" in message: keys=["cx","cy"] #dont reset all
-                    for key in keys:
-                        self.COM.exec("rig.memory["+key+"]=0")
-                elif "lower" in message: #lower sensor on to base
-                    average=message.replace("lower=","") 
-                    self.COM.exec_raw_no_follow("rig.lowerSensor("+str(average)+")")
-                elif "ZERO" in message:
-                    self.COM.exec_raw_no_follow("rig.zero()")
-                elif "DIST" in message:
-                    return float(self.COM.exec('rig.getSensor()').decode("utf-8").replace("\r\n",""))
-                elif "centre" in message:
-                    self.COM.exec_raw_no_follow("rig.centre()")
-                elif "perfect" in message:
-                    self.COM.exec_raw_no_follow("rig.setPerfect()")
-            except pyboard.PyboardError as e:
-                pass
+        reconnect=True
+        while reconnect:
+            if self.variant=="circuitpython":
+                try:
+                    self.ser.write((message+"\n").encode())
+                except serial.serialutil.SerialTimeoutException:
+                    print("serial issue")
+            else: #micropython send command
+                try:
+                    if "RESET" in message:
+                        self.COM.exec('rig.reset()')
+                    elif "CALIB" in message:
+                        self.COM.exec('rig.inPosition=True')
+                    elif "BUTTONS" in message:
+                        b=self.COM.exec("print(rig.readButtons())").decode("utf-8").replace("\r\n","").replace("[","").replace("]","").replace(" ","")
+                        ar=[]
+                        for val in b.split(","):
+                            ar.append(int(val))
+                        return ar
+                    elif "MOVE:" in message:
+                        com=message.replace("MOVE:","")
+                        com=com.split(",")
+                        self.COM.exec('move('+(com[0])+','+(com[1])+','+(com[2])+','+(com[3])+')')
+                    elif "pressure" in message:
+                        return self.COM.exec('pressure()').decode("utf-8").replace("\r\n","")
+                    elif "getmove" in message: #get all the rig values
+                        b=self.COM.exec('print([rig.memory[key] for key in ["x","y","z","cx","cy","cz"]])').decode("utf-8").replace("\r\n","").replace("[","").replace("]","").replace(" ","")
+                        ar=[]
+                        for val in b.split(","):
+                            ar.append(int(val))
+                        return ar
+                    elif "setmove" in message: #reset the values to be 0
+                        keys=["cx","cy","cz"]
+                        if "setmove1" in message: keys=["cx","cy"] #dont reset all
+                        for key in keys:
+                            self.COM.exec("rig.memory['"+key+"']=0")
+                    elif "lower" in message: #lower sensor on to base
+                        average=message.replace("lower=","") 
+                        self.COM.exec("rig.lowerSensor("+str(average)+")")
+                    elif "ZERO" in message:
+                        self.COM.exec("rig.zero()")
+                    elif "DIST" in message:
+                        return float(self.COM.exec('rig.getSensor()').decode("utf-8").replace("\r\n",""))
+                    elif "centre" in message:
+                        self.COM.exec("rig.centre()")
+                    elif "perfect" in message:
+                        self.COM.exec("rig.setPerfect()")
+                    reconnect=False
+                except pyboard.PyboardError as e:
+                    print("Pyboard issue",e)
+                    disconnect_from_device(self.COM)
+                    self.COM=pyboard.Pyboard(self.COM_) #connect to board
+                    self.COM.enter_raw_repl() #open for commands
+                    self.COM.execfile(self.file)
+                except serial.serialutil.SerialException as e:
+                    print("Serial problem...")
+                    disconnect_from_device(self.COM)
+                    self.COM=pyboard.Pyboard(self.COM_) #connect to board
+                    self.COM.enter_raw_repl() #open for commands
+                    self.COM.execfile(self.file)
+                    
     def reset_trial(self,centering=True):
         movements=self.sendCommand("getmove")[3:]
         if centering: self.sendCommand("centre")
@@ -92,6 +119,7 @@ class Controller:
             self.sendCommand("MOVE:0,-100,0,0")
         for i in range(4):
             self.sendCommand("MOVE:-100,-100,0,0")
+        print("Centred...")
         self.sendCommand("setmove")
         if lower:
             self.sendCommand("lower="+str(value))

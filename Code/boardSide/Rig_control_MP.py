@@ -42,7 +42,7 @@ class Rig:
            self.sensor_plate=Plate(Pin(26,machine.Pin.OUT),i2c=None,address=0x21,sda=None,scl=None,alpha=0.4)
         self.memory={"x":-1000,"y":-5200,"z":0,"a":0,"cx":0,"cy":0,"cz":0,"ca":0,"dist":9}
         self.inPosition=False
-        self.zero()
+        #self.zero()
         trigger_pin = Pin(4, Pin.OUT)  # Change this to the pin connected to the trigger
         echo_pin = Pin(3, Pin.IN)      # Change this to the pin connected to the echo
 
@@ -134,3 +134,4 @@ class client:
         return command
     def send(self,message):
         print(f">{message}<")
+
