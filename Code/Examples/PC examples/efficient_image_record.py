@@ -1,6 +1,6 @@
 import sys
-sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Rig-controller/Code/')
-
+sys.path.insert(1, '/home/dexter/Documents/Rig-controller/Code/')
+sys.path.insert(1, '/home/dexter/Documents/TactileSensor/Code') 
 ###################################################
 import time
 import Controller
@@ -12,13 +12,12 @@ import os
 class experiment:
     def __init__(self,name,FORCE):
         clear = lambda: os.system('cls')
-        path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-        path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/"
-        c= Controller.Controller('COM19',file=path)
-        c= Controller.Controller('COM19',file=path)
+        path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
+        path_to_save="/home/dexter/Documents/data/"
+        c= Controller.Controller("/dev/ttyACM1",file=path)
         THRESH=6000
         Pressure_extra=0  #-200 for carpet #-100 for plastic #0 for normal #-350 for cork#350 for foam #-10 for pressurepad
-        c.calibrate(value=THRESH,lower=False,val=10) #takes a while - only want to do once
+        #c.calibrate(value=THRESH,lower=False,val=10) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
         ####################
@@ -52,7 +51,7 @@ class experiment:
                     x_vector=10*dirs[0]
                     y_vector=10*dirs[1]
                     ret, frame = cap.read()
-                    ar=np.zeros((100,*frame.shape)).astype(np.uint8)
+                    ar=np.zeros((100,*frame.shape),dtype=np.uint8)
                     for i in range(0,100):
                         c.move(x_vector,y_vector,0,0)
                         ret, frame = cap.read()
@@ -66,7 +65,7 @@ class experiment:
                         if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
                     return ar
-        data=np.zeros((num_experiments,num_of_trials,100,*frame.shape)).astype(np.uint8)
+        data=np.zeros((num_experiments,num_of_trials,100,*frame.shape),dtype=np.uint8)
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
                 clear()
@@ -82,7 +81,8 @@ class experiment:
                     c.move(0,0,1000,0)
                     print("Paused... do you want to continue (ENTER yes ctrl-C no)")
                     input(">")
-                np.save(path_to_save+"/"+name,data) #constant backups
+                if trial%10==0:
+                    np.save(path_to_save+"/"+name,data) #constant backups
 
         #plt.show()
         print("TOTAL EXECUTION TIME:",(time.time()-starttime)/(60*60),"hours")
