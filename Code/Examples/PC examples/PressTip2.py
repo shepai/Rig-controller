@@ -1,7 +1,7 @@
 #for the sake of running on my device - comment out
 import sys
-sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Rig-controller/Code/')
-sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/TactileSensor/Code') 
+sys.path.insert(1, '/home/dexter/Documents/Rig-controller/Code/')
+sys.path.insert(1, '/home/dexter/Documents/TactileSensor/Code') 
 ###################################################
 import time
 import Controller
@@ -13,13 +13,16 @@ import os
 import TactileSensor as ts
 filename=""
 sensor=[]
+
+
+
 class experiment:
     def __init__(self,name,FORCE):
         global filename
         global sensor
-        clear = lambda: os.system('cls')
-        path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-        path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/"
+        clear = lambda: os.system('clear')
+        path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
+        path_to_save="/home/dexter/Documents/data/"
         #name="TacTip_Efoam_P100"
         #FORCE=100 #0, 10, 20, 30, 40, 50, 60, 70, 80 ,90
         path_ = os.path.join(path_to_save, name) 
@@ -32,7 +35,7 @@ class experiment:
         except:
             pass
         path_to_save=path_to_save+name+"/"+name
-        c= Controller.Controller('COM19',file=path)
+        c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
         Pressure_extra=-440 #0 for normal #-350 for cork#450 for foam
         c.calibrate(value=THRESH,lower=False,val=-2010-Pressure_extra) #takes a while - only want to do once
@@ -43,9 +46,9 @@ class experiment:
         B=ts.Board()
         #get serial boards and connect to first one
         print("Connecting to sensor")
-        B.connect("COM4")
+        B.connect("/dev/ttyACM1")
         print("Running file")
-        B.runFile("C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
+        B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
         print("File ran")
         sensor=[]
         def runTrial(SAVER,dirs=[0,0]):
@@ -111,9 +114,9 @@ class experiment_2:
     def __init__(self,name,FORCE):
         global filename
         global sensor
-        clear = lambda: os.system('cls')
-        path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-        path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/"
+        clear = lambda: os.system('clear')
+        path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
+        path_to_save="/home/dexter/Documents/data/"
         #name="TacTip_Efoam_P100"
         #FORCE=100 #0, 10, 20, 30, 40, 50, 60, 70, 80 ,90
         path_ = os.path.join(path_to_save, name) 
@@ -126,9 +129,9 @@ class experiment_2:
         except:
             pass
         path_to_save=path_to_save+name+"/"+name
-        c= Controller.Controller('COM19',file=path)
+        c= Controller.Controller("/dev/ttyACM1",file=path)
         THRESH=6000
-        Pressure_extra=150 #0 for normal #-350 for cork#450 for foam #-440  for weight
+        Pressure_extra=-240 # #-500  for cork/ carpert#-40 for foam # normal is -440
         c.calibrate(value=THRESH,lower=False,val=-2010-Pressure_extra) #takes a while - only want to do once
         #c.sendCommand("CALIB") #do if already calibrated
         #####################
@@ -137,15 +140,16 @@ class experiment_2:
         B=ts.Board()
         #get serial boards and connect to first one
         print("Connecting to sensor")
-        B.connect("COM4")
+        B.connect("/dev/ttyACM0")
         print("Running file")
-        B.runFile("C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
+        B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
         print("File ran")
         sensor=[]
         def runTrial(SAVER,dirs=[0,0]):
             global sensor
             global filename
             c.reset_trial() #return to center position
+            time.sleep(1)
             c.move(EDGE_VALUE+0,50,50-FORCE,0)
             #move sensor across surface
             t1=time.time()

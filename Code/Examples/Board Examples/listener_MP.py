@@ -15,6 +15,7 @@ def pressure():
 def move(x,y,z,a):
     array=[x,y,z,a]
     rig.moveMotors(*array) #move the motors
+    print("done")
 def reset():
     rig.reset()
 

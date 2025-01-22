@@ -2,6 +2,7 @@ import time
 import serial
 from mpremote import pyboard
 import subprocess
+import serial.tools.list_ports
 
 def disconnect_from_device(COM):
     # Make sure to properly close the connection and release the serial port
@@ -11,7 +12,11 @@ def disconnect_from_device(COM):
         COM.close()  # Close the serial connection properly
     except Exception as e:
         print(f"Error during disconnect: {e}")
-
+def is_serial_port_available(port):
+    """Check if a serial port is available for connection."""
+    available_ports = [p.device for p in serial.tools.list_ports.comports()]
+    print(available_ports)
+    return port in available_ports
 class Controller:
     def __init__(self,COM,variant="micropython",file=""):
         self.variant=variant.lower()
@@ -94,6 +99,9 @@ class Controller:
                 except serial.serialutil.SerialException as e:
                     print("Serial problem...")
                     disconnect_from_device(self.COM)
+                    while not is_serial_port_available(self.COM_):
+                        print(f"Waiting for port {self.COM_} to be available...")
+                        time.sleep(2)
                     self.COM=pyboard.Pyboard(self.COM_) #connect to board
                     self.COM.enter_raw_repl() #open for commands
                     self.COM.execfile(self.file)

@@ -77,6 +77,7 @@ class Rig:
                     motors[j]-=1
                     if self.inPosition: #if moved to position track movements
                         self.memory[keys[j]]-=actualDir[j]*1 #reverse direction to get back    
+        print("moved")
     def readBase(self):
         #read the force on rig
         if self.plate>0:

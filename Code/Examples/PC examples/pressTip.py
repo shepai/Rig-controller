@@ -1,7 +1,7 @@
 #for the sake of running on my device - comment out
 import sys
-sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/Rig-controller/Code/')
-sys.path.insert(1, 'C:/Users/dexte/Documents/GitHub/TactileSensor/Code') 
+sys.path.insert(1, '/home/dexter/Documents/Rig-controller/Code/')
+sys.path.insert(1, '/home/dexter/Documents/TactileSensor/Code') 
 ###################################################
 import time
 import Controller
@@ -10,9 +10,9 @@ import TactileSensor as ts
 import numpy as np
 import matplotlib.pyplot as plt
 
-path="C:/Users/dexte/Documents/GitHub/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
-path_to_save="C:/Users/dexte/Documents/AI/XML_sensors/sensor_P120"
-c= Controller.Controller('COM19',file=path)
+path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
+path_to_save="/home/dexter/Documents/data/sensor_P120"
+c= Controller.Controller('/dev/ttyACM0',file=path)
 THRESH=6000
 c.calibrate(value=THRESH) #takes a while - only want to do once
 #c.sendCommand("CALIB") #do if already calibrated
@@ -22,9 +22,9 @@ c.calibrate(value=THRESH) #takes a while - only want to do once
 B=ts.Board()
 #get serial boards and connect to first one
 print("Connecting to sensor")
-B.connect("COM24")
+B.connect("/dev/ttyACM1")
 print("Running file")
-B.runFile("C:/Users/dexte/Documents/GitHub/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
+B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
 print("File ran")
 sensor=[]
 def runTrial(SAVER,dirs=[0,0]):
