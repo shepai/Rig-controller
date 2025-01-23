@@ -65,24 +65,24 @@ class experiment:
         data=np.zeros((num_experiments,num_of_trials,100,*frame.shape),dtype=np.uint8)
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
-                total_operations_left=(num_experiments-exp)*(num_of_trials-trial)*(len(np.arange(0,1,0.1))*(len(np.arange(0,1,0.1))-i))
-                time_taken=(time.time()-starttime)/max(total_operations-total_operations_left,0.001)
-                clear()
-                print("Experiment",exp+1,"Trial",trial+1)
-                print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",
-                      (time_taken*total_operations_left)/(60*60),"hours")
-                        
-                try:
-                    x=0
-                    y=1
-                    dat=runTrial(experiment,dirs=[x,y]) #send vector through
-                    data[exp][trial]=dat.copy()
-                    c.move(0,0,500,0)
-                except KeyboardInterrupt:
-                    c.reset_trial()
-                    c.move(0,0,1000,0)
-                    print("Paused... do you want to continue (ENTER yes ctrl-C no)")
-                    input(">")
+                for i,y in enumerate(np.arange(0,1,0.1)): #move y along surface 
+                    for x in reversed(np.arange(0,1,0.1)): #move direction of x along
+                        total_operations_left=(num_experiments-exp)*(num_of_trials-trial)*(len(np.arange(0,1,0.1))*(len(np.arange(0,1,0.1))-i))
+                        time_taken=(time.time()-starttime)/max(total_operations-total_operations_left,0.001)
+                        clear()
+                        print("Experiment",exp+1,"Trial",trial+1)
+                        print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",
+                            (time_taken*total_operations_left)/(60*60),"hours")                           
+                        try:
+
+                            dat=runTrial(experiment,dirs=[x,y]) #send vector through
+                            data[exp][trial]=dat.copy()
+                            c.move(0,0,500,0)
+                        except KeyboardInterrupt:
+                            c.reset_trial()
+                            c.move(0,0,1000,0)
+                            print("Paused... do you want to continue (ENTER yes ctrl-C no)")
+                            input(">")
                 if trial%10==0:
                     np.save(path_to_save+"/"+name,data) #constant backups
 
