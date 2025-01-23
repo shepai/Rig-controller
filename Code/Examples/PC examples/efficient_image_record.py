@@ -11,13 +11,13 @@ import os
 
 class experiment:
     def __init__(self,name,FORCE):
-        clear = lambda: os.system('cls')
+        clear = lambda: os.system('clear')
         path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM1",file=path)
         THRESH=6000
         Pressure_extra=0  #-200 for carpet #-100 for plastic #0 for normal #-350 for cork#350 for foam #-10 for pressurepad
-        #c.calibrate(value=THRESH,lower=False,val=10) #takes a while - only want to do once
+        c.calibrate(value=THRESH,lower=False,val=10) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
         ####################
@@ -35,9 +35,6 @@ class experiment:
         ####################
         num_experiments=1
         num_of_trials=100
-        angle=0
-        speed=100
-        texture="Plastic"
         starttime=time.time()
         total_operations=(num_of_trials*(len(np.arange(0,1,0.1))**2))*num_experiments
         EDGE_VALUE=0
@@ -68,8 +65,13 @@ class experiment:
         data=np.zeros((num_experiments,num_of_trials,100,*frame.shape),dtype=np.uint8)
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
+                total_operations_left=(num_experiments-exp)*(num_of_trials-trial)*(len(np.arange(0,1,0.1))*(len(np.arange(0,1,0.1))-i))
+                time_taken=(time.time()-starttime)/max(total_operations-total_operations_left,0.001)
                 clear()
                 print("Experiment",exp+1,"Trial",trial+1)
+                print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",
+                      (time_taken*total_operations_left)/(60*60),"hours")
+                        
                 try:
                     x=0
                     y=1
