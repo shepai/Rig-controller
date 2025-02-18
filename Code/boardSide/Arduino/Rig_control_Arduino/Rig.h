@@ -18,6 +18,7 @@ class RigControl {
     int buttonY = 7;    // pushbutton connected to digital pin
     int buttonZ = 7;    // pushbutton connected to digital pin
     int* positions;
+    int * set_value;
   public:
     // Constructor
     RigControl() {
@@ -27,8 +28,8 @@ class RigControl {
       myMotorA = kit1.getStepper(200, 2);
       myMotorB = kit1.getStepper(200, 1);
       myMotorC = kit2.getStepper(200, 2);
-      int set_value = {10,10,10};
-      int positions[] ={0,0,0};
+      int set_value[3] = {10,10,10};
+      int positions[3] ={0,0,0};
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) {
       myMotorA->setSpeed(rpm1);
@@ -52,8 +53,8 @@ class RigControl {
       int moveX=positions[0]*-1;
       int moveY=positions[1]*-1;
       int moveZ=positions[2]*-1;
-      move(moveX,moveY,moveZ)
-      positions={0,0,0};
+      move(moveX,moveY,moveZ);
+      memset(positions, 0, sizeof(positions));  // Set all values to 0
     }
     int *readButtons() {
       static int buttonStates[3];  // Static array to keep data after function exits
