@@ -30,17 +30,17 @@ class RigControl {
       int positions[] ={0,0,0};
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) {
-      myMotorA.setSpeed(rpm1);
-      myMotorB.setSpeed(rpm2);
-      myMotorC.setSpeed(rpm3);
+      myMotorA->setSpeed(rpm1);
+      myMotorB->setSpeed(rpm2);
+      myMotorC->setSpeed(rpm3);
     }
     void move(int x, int y, int z) {
-      if(x>0){myMotorA.step(abs(x), FORWARD, SINGLE); }
-      else{myMotorA.step(abs(x), BACKWARD, SINGLE); }
-      if(y>0){myMotorB.step(abs(y), FORWARD, SINGLE); }
-      else{myMotorB.step(abs(y), BACKWARD, SINGLE); }
-      if(z>0){myMotorC.step(abs(z), FORWARD, SINGLE); }
-      else{myMotorC.step(abs(z), BACKWARD, SINGLE); }
+      if(x>0){myMotorA->step(abs(x), FORWARD, SINGLE); }
+      else{myMotorA->step(abs(x), BACKWARD, SINGLE); }
+      if(y>0){myMotorB->step(abs(y), FORWARD, SINGLE); }
+      else{myMotorB->step(abs(y), BACKWARD, SINGLE); }
+      if(z>0){myMotorC->step(abs(z), FORWARD, SINGLE); }
+      else{myMotorC->step(abs(z), BACKWARD, SINGLE); }
     }
     void zero(){
 
