@@ -1,31 +1,33 @@
 // rig controller lib
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
-#include "utility/Adafruit_PWMServoDriver.h"
+#include "Adafruit_PWMServoDriver.h"
 
 #ifndef LEDCONTROL_H
 #define LEDCONTROL_H
 
-Adafruit_MotorShield kit1 = Adafruit_MotorShield AFMStop(0x60); 
-Adafruit_MotorShield kit2 = Adafruit_MotorShield AFMStop(0x70); 
+Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x60); 
+Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70); 
 
 class RigControl {
   private:
-    Adafruit_StepperMotor *myMotorA = kit1.getStepper(200, 2);
-    Adafruit_StepperMotor *myMotorB = kit1.getStepper(200, 2);
-    Adafruit_StepperMotor *myMotorC = kit2.getStepper(200, 2);
+    Adafruit_StepperMotor *myMotorA;
+    Adafruit_StepperMotor *myMotorB;
+    Adafruit_StepperMotor *myMotorC;
     int buttonX = 7;    // pushbutton connected to digital pin 
     int buttonY = 7;    // pushbutton connected to digital pin
     int buttonZ = 7;    // pushbutton connected to digital pin
-    pinMode(buttonX, INPUT);
-
-    int positions[] ={0,0,0};
+    int positions[];
   public:
     // Constructor
     RigControl() {
-      pin = ledPin;
-      state = false;
-      pinMode(pin, OUTPUT);
+      pinMode(buttonX, INPUT);
+      pinMode(buttonY, INPUT);
+      pinMode(buttonZ, INPUT);
+      myMotorA = kit1.getStepper(200, 2);
+      myMotorB = kit1.getStepper(200, 1);
+      myMotorC = kit2.getStepper(200, 2);
+      int positions[] ={0,0,0};
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) {
       myMotorA.setSpeed(rpm1);
@@ -45,28 +47,6 @@ class RigControl {
     }
     int * readButtons() {
 
-    }
-    // Turn LED on
-    void on() {
-      digitalWrite(pin, HIGH);
-      state = true;
-    }
-
-    // Turn LED off
-    void off() {
-      digitalWrite(pin, LOW);
-      state = false;
-    }
-
-    // Toggle LED state
-    void toggle() {
-      state = !state;
-      digitalWrite(pin, state ? HIGH : LOW);
-    }
-
-    // Get LED state
-    bool isOn() {
-      return state;
     }
 };
 
