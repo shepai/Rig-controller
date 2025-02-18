@@ -1,6 +1,6 @@
 #include "Rig.h"
 
-LEDControl led(13); // Use pin 13 for the LED
+RigControl rig = RigControl(); // Use pin 13 for the LED
 
 void setup() {
   led.on(); // Turn on the LED

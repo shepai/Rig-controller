@@ -14,6 +14,11 @@ class RigControl {
     Adafruit_StepperMotor *myMotorA = kit1.getStepper(200, 2);
     Adafruit_StepperMotor *myMotorB = kit1.getStepper(200, 2);
     Adafruit_StepperMotor *myMotorC = kit2.getStepper(200, 2);
+    int buttonX = 7;    // pushbutton connected to digital pin 
+    int buttonY = 7;    // pushbutton connected to digital pin
+    int buttonZ = 7;    // pushbutton connected to digital pin
+    pinMode(buttonX, INPUT);
+
     int positions[] ={0,0,0};
   public:
     // Constructor
@@ -36,7 +41,10 @@ class RigControl {
       else{myMotorC.step(abs(z), BACKWARD, SINGLE); }
     }
     void zero(){
-      
+
+    }
+    int * readButtons() {
+
     }
     // Turn LED on
     void on() {
