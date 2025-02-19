@@ -9,6 +9,13 @@
 Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x60); 
 Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70); 
 
+int sumArray(int arr[]) {
+    int sum = 0;
+    for (int i = 0; i < sizeof(arr); ++i)
+        sum += arr[i];
+    return sum;
+}
+
 class RigControl {
   private:
     Adafruit_StepperMotor *myMotorA;
@@ -30,6 +37,7 @@ class RigControl {
       myMotorC = kit2.getStepper(200, 2);
       int set_value[3] = {10,10,10};
       int positions[3] ={0,0,0};
+      Serial.begin(115200);
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) {
       myMotorA->setSpeed(rpm1);
@@ -50,11 +58,31 @@ class RigControl {
       positions[2]+=z;
     }
     void zero(){ // return to states
+      Serial.println("MOVING TO ZERO");
       int moveX=positions[0]*-1;
       int moveY=positions[1]*-1;
       int moveZ=positions[2]*-1;
       move(moveX,moveY,moveZ);
       memset(positions, 0, sizeof(positions));  // Set all values to 0
+    }
+    void reset(){ //reset the rig till all buttons are suppressed
+      int movearray[3] = {0,0,0};
+      int* states = readButtons();
+      while(sumArray(states)!=0) { //loop till all rig features are stuck
+        states = readButtons();
+        movearray[0]=0; movearray[1]=0; movearray[2]=0;
+        if(states[0]) {
+          movearray[0]=10;
+        }if(states[1]) {
+          movearray[1]=10;
+        }if(states[2]) {
+          movearray[2]=10;
+        }
+      }
+    }
+    void centre(int x, int y, int z) {
+      move(x,y,z);
+      positions[0]=0; positions[1]=0; positions[2]=0;
     }
     int *readButtons() {
       static int buttonStates[3];  // Static array to keep data after function exits

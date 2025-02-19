@@ -1,6 +1,9 @@
 import time
 import serial
-from mpremote import pyboard
+try:
+    from mpremote import pyboard
+except:
+    print("No python device")
 import subprocess
 import serial.tools.list_ports
 
@@ -154,3 +157,38 @@ class Controller:
             ar.append(int(item))
         return ar
 
+class Arduino_Rig:
+    def __init__(self,COM="/dev/ttyACM0"):
+        # Set up serial connection (adjust 'COM3' to your port and baudrate to match Arduino)
+        self.arduino = serial.Serial(port=COM, baudrate=115200, timeout=1)
+        time.sleep(2)  # Allow time for Arduino to reset
+
+    def send_command(self,command):
+        self.arduino.write((command + '\n').encode())
+
+    def send_command_await(self,command):
+        print(command)
+        self.arduino.write((command + '\n').encode())
+        while True:
+            response = self.arduino.readline().decode('utf-8').strip()
+            if response:
+                print(f"Arduino response: {response}")
+                if "done" in response:
+                    break
+
+    def reset_trial(self):
+        self.send_command_await("RESET")
+
+    def calibrate(self,value=7500,lower=True,val=0):
+        self.send_command_await("CALIB-100,100,"+str(val))
+
+    def reset(self):
+        pass
+
+    def move(self,x,y,z):
+        self.send_command_await("MOVE-"+str(x)+","+str(y)+","+str(z))
+
+if __name__ == "__main__":
+    arduino_test=Arduino_Rig()
+    arduino_test.calibrate()
+    #arduino_test.move(10,10,10)
