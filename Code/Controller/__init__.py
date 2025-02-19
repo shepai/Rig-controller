@@ -109,7 +109,7 @@ class Controller:
                     self.COM.enter_raw_repl() #open for commands
                     self.COM.execfile(self.file)
                     
-    def reset_trial(self,centering=True):
+    def reset_trial(self,centering=0):
         movements=self.sendCommand("getmove")[3:]
         if centering: self.sendCommand("centre")
         self.move(*movements,0)
@@ -132,14 +132,17 @@ class Controller:
             self.sendCommand("MOVE:-100,-100,0,0")
         print("Centred...")
         self.sendCommand("setmove")
+        print("calibrating position...")
         if lower:
             self.sendCommand("lower="+str(value))
             print("Lowered to point")
         else:
             self.sendCommand("MOVE:0,0,"+str(val)+",0")
+            print("Resetting..")
             self.reset_trial()
+            
         self.sendCommand("CALIB")
-        self.sendCommand("centre")
+        #self.sendCommand("centre")
         print("Calibration done")
     def move(self,x,y,z,a):
         #move the rig by these amounts
