@@ -35,7 +35,7 @@ void flash() {
 void ProcessCommand(String command) {
   Serial.println(command);
   if (command.startsWith("CALIB-")) {
-      int value, lower, val;
+      int x, y, z;
       sscanf(command.c_str(), "CALIB-%d,%d,%d", &x, &y, &z);
       rig.move(x, y, z);
       Serial.println("Calibration");
@@ -53,9 +53,6 @@ void ProcessCommand(String command) {
       Serial.println("Resetting...");
       rig.reset();
       Serial.println("done");
-  }else if () {
-    
-    
   }else {
       Serial.println("Unknown command");
       Serial.println("done");
