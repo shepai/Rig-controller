@@ -51,20 +51,36 @@ class RigControl {
       myMotorB->setSpeed(rpm2);
       myMotorC->setSpeed(rpm3);
     }
-    void move(int x, int y, int z) { // move the steppers based on direction, but not if pushing against wall
+    void move(int x, int y, int z) {
       int* states = readButtons();
-      //Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
-      //Serial.print(x);Serial.print(y);Serial.println(z);
-      if(x>0 && states[0]==0){myMotorA->step(abs(x), FORWARD, DOUBLE);}
-      else if (x<0){myMotorA->step(abs(x), BACKWARD, DOUBLE);}
-      if(y>0 && states[1]==0){myMotorB->step(abs(y), FORWARD, DOUBLE); }
-      else if (y<0){myMotorB->step(abs(y), BACKWARD, DOUBLE); }
-      if(z>0 && states[2]==0){myMotorC->step(abs(z), FORWARD, DOUBLE); }
-      else if (z<0){myMotorC->step(abs(z), BACKWARD, DOUBLE); }
-      //update memory of position
-      positions[0]+=x;
-      positions[1]+=y;
-      positions[2]+=z;
+      // Store directions and total steps
+      int steps[3] = {abs(x), abs(y), abs(z)};
+      int dir[3] = {x > 0 ? FORWARD : BACKWARD, y > 0 ? FORWARD : BACKWARD, z > 0 ? FORWARD : BACKWARD};
+      // Prevent movement if blocked by limits
+      for (int i = 0; i < 3; i++) {
+        if (states[i] != 0) steps[i] = 0;
+      }
+      //find the motor with the most steps
+      int max_steps = max(steps[0], max(steps[1], steps[2]));
+      int accum[3] = {0, 0, 0};
+      for (int i = 0; i < max_steps; i++) {
+        // Move each motor proportionally
+        for (int j = 0; j < 3; j++) {
+          if (steps[j] > 0) {
+            accum[j] += steps[j];
+            if (accum[j] >= max_steps) {
+              accum[j] -= max_steps;
+              if (j == 0) myMotorA->step(1, dir[0], DOUBLE);
+              if (j == 1) myMotorB->step(1, dir[1], DOUBLE);
+              if (j == 2) myMotorC->step(1, dir[2], DOUBLE);
+            }
+          }
+        } 
+      }
+      // Update memory of position
+      positions[0] += x;
+      positions[1] += y;
+      positions[2] += z;
     }
     void zero(){ // return to states
       int moveX=positions[0]*-1;
