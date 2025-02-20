@@ -20,8 +20,8 @@ int sumArray(int arr[]) {
 class RigControl {
   private:
     
-    int buttonX = 7;    // pushbutton connected to digital pin 
-    int buttonY = 8;    // pushbutton connected to digital pin
+    int buttonY = 7;    // pushbutton connected to digital pin 
+    int buttonX = 8;    // pushbutton connected to digital pin
     int buttonZ = 9;    // pushbutton connected to digital pin
     int* positions;
     int * set_value;
@@ -42,14 +42,11 @@ class RigControl {
       setSpeeds(100,100,100);
       
     }
-    void init() {
+    void init() { //init seperate to main load up to avoid interference with serial communication
       kit1.begin();
       kit2.begin();
     }
-    void setSpeeds(int rpm1, iAdafruit_StepperMotor *myMotorB;
-Adafruit_StepperMotor *myMotorC;
-Adafruit_MotorShield kit1;
-Adafruit_MotorShield kit2;nt rpm2, int rpm3) {
+    void setSpeeds(int rpm1, int rpm2, int rpm3) { //set the speeds of each motor
       myMotorA->setSpeed(rpm1);
       myMotorB->setSpeed(rpm2);
       myMotorC->setSpeed(rpm3);
@@ -59,11 +56,11 @@ Adafruit_MotorShield kit2;nt rpm2, int rpm3) {
       //Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
       //Serial.print(x);Serial.print(y);Serial.println(z);
       if(x>0 && states[0]==0){myMotorA->step(abs(x), FORWARD, DOUBLE);}
-      else{myMotorA->step(abs(x), BACKWARD, DOUBLE);}
+      else if (x<0){myMotorA->step(abs(x), BACKWARD, DOUBLE);}
       if(y>0 && states[1]==0){myMotorB->step(abs(y), FORWARD, DOUBLE); }
-      else{myMotorB->step(abs(y), BACKWARD, DOUBLE); }
+      else if (y<0){myMotorB->step(abs(y), BACKWARD, DOUBLE); }
       if(z>0 && states[2]==0){myMotorC->step(abs(z), FORWARD, DOUBLE); }
-      else{myMotorC->step(abs(z), BACKWARD, DOUBLE); }
+      else if (z<0){myMotorC->step(abs(z), BACKWARD, DOUBLE); }
       //update memory of position
       positions[0]+=x;
       positions[1]+=y;
@@ -91,7 +88,7 @@ Adafruit_MotorShield kit2;nt rpm2, int rpm3) {
         }
       }
     }
-    void centre(int x, int y, int z) {
+    void centre(int x, int y, int z) { //center the rig
       move(x,y,z);
       positions[0]=0; positions[1]=0; positions[2]=0;
     }

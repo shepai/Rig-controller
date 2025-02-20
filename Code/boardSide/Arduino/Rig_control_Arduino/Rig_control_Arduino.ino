@@ -74,6 +74,10 @@ void ProcessCommand(String command) {
   } else if (command=="RESET") {
       Serial.println("Resetting...");
       rig.reset();
+      Serial.println("done");  
+  }else if (command=="SHOW") {
+      int* states = rig.readButtons();
+      Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
       Serial.println("done");
   }else {
       Serial.println("Unknown command");
