@@ -21,6 +21,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   rig=RigControl(); 
   rig.init();
+  //rig.move(10,10,10);
 }
 
 void loop() {

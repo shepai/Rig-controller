@@ -5,7 +5,11 @@
 
 #ifndef LEDCONTROL_H
 #define LEDCONTROL_H
-
+Adafruit_StepperMotor *myMotorA;
+Adafruit_StepperMotor *myMotorB;
+Adafruit_StepperMotor *myMotorC;
+Adafruit_MotorShield kit1;
+Adafruit_MotorShield kit2;
 int sumArray(int arr[]) {
     int sum = 0;
     for (int i = 0; i < sizeof(arr); ++i)
@@ -15,11 +19,7 @@ int sumArray(int arr[]) {
 
 class RigControl {
   private:
-    Adafruit_StepperMotor *myMotorA;
-    Adafruit_StepperMotor *myMotorB;
-    Adafruit_StepperMotor *myMotorC;
-    Adafruit_MotorShield kit1;
-    Adafruit_MotorShield kit2;
+    
     int buttonX = 7;    // pushbutton connected to digital pin 
     int buttonY = 8;    // pushbutton connected to digital pin
     int buttonZ = 9;    // pushbutton connected to digital pin
@@ -46,7 +46,10 @@ class RigControl {
       kit1.begin();
       kit2.begin();
     }
-    void setSpeeds(int rpm1, int rpm2, int rpm3) {
+    void setSpeeds(int rpm1, iAdafruit_StepperMotor *myMotorB;
+Adafruit_StepperMotor *myMotorC;
+Adafruit_MotorShield kit1;
+Adafruit_MotorShield kit2;nt rpm2, int rpm3) {
       myMotorA->setSpeed(rpm1);
       myMotorB->setSpeed(rpm2);
       myMotorC->setSpeed(rpm3);
@@ -55,8 +58,8 @@ class RigControl {
       int* states = readButtons();
       //Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
       //Serial.print(x);Serial.print(y);Serial.println(z);
-      if(x>0 && states[0]==0){myMotorA->step(abs(x), FORWARD, DOUBLE); }
-      else{myMotorA->step(abs(x), BACKWARD, DOUBLE); }
+      if(x>0 && states[0]==0){myMotorA->step(abs(x), FORWARD, DOUBLE);}
+      else{myMotorA->step(abs(x), BACKWARD, DOUBLE);}
       if(y>0 && states[1]==0){myMotorB->step(abs(y), FORWARD, DOUBLE); }
       else{myMotorB->step(abs(y), BACKWARD, DOUBLE); }
       if(z>0 && states[2]==0){myMotorC->step(abs(z), FORWARD, DOUBLE); }
