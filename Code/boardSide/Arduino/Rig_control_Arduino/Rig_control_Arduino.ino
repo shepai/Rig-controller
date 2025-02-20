@@ -1,10 +1,25 @@
 #include "Rig.h"
-
-RigControl rig = RigControl(); // Use pin 13 for the LED
+#include <Wire.h>
+RigControl rig; //= RigControl(); // Use pin 13 for the LED
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  Serial.print("Loaded Rig...");
+  Serial.println("Scanning I2C bus...");
+  Wire.begin();  // Start I2C communication
+  // Scan for all I2C devices
+  for (byte i = 8; i < 120; i++) {
+    Wire.beginTransmission(i);
+    byte error = Wire.endTransmission();
+    
+    if (error == 0) {
+      Serial.print("Found device at address 0x");
+      Serial.println(i, HEX);
+    }
+  }
+  delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
+  rig=RigControl(); 
 }
 
 void loop() {
@@ -22,6 +37,7 @@ void loop() {
     }
     command.trim();
     if (incomingChar == '\n') {
+      Serial.println("Command recieved");
       ProcessCommand(command);
       flash();
     }
@@ -36,17 +52,19 @@ void ProcessCommand(String command) {
   Serial.println(command);
   if (command.startsWith("CALIB-")) {
       int x, y, z;
-      sscanf(command.c_str(), "CALIB-%d,%d,%d", &x, &y, &z);
+      sscanf(command.c_str(), "CALIB-%d-%d-%d", &x, &y, &z);
       rig.move(x, y, z);
       Serial.println("Calibration");
       Serial.println("done");
   } else if (command == "ZERO") {
+      Serial.println("Zeroing device");
       rig.zero();
       delay(10);
       Serial.println("done");
-  } else if (command.startsWith("MOVE-")) {
+  } else if (command.startsWith("MOVE,")) {
+      Serial.println("Moving rig...");
       int x, y, z;
-      sscanf(command.c_str(), "MOVE-%d,%d,%d", &x, &y, &z);
+      sscanf(command.c_str(), "MOVE,%d,%d,%d", &x, &y, &z);
       rig.move(x, y, z);
       Serial.println("done");
   } else if (command=="RESET") {

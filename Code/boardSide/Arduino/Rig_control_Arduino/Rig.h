@@ -6,9 +6,6 @@
 #ifndef LEDCONTROL_H
 #define LEDCONTROL_H
 
-Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x60); 
-Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70); 
-
 int sumArray(int arr[]) {
     int sum = 0;
     for (int i = 0; i < sizeof(arr); ++i)
@@ -22,8 +19,8 @@ class RigControl {
     Adafruit_StepperMotor *myMotorB;
     Adafruit_StepperMotor *myMotorC;
     int buttonX = 7;    // pushbutton connected to digital pin 
-    int buttonY = 7;    // pushbutton connected to digital pin
-    int buttonZ = 7;    // pushbutton connected to digital pin
+    int buttonY = 8;    // pushbutton connected to digital pin
+    int buttonZ = 9;    // pushbutton connected to digital pin
     int* positions;
     int * set_value;
   public:
@@ -32,12 +29,19 @@ class RigControl {
       pinMode(buttonX, INPUT);
       pinMode(buttonY, INPUT);
       pinMode(buttonZ, INPUT);
-      myMotorA = kit1.getStepper(200, 2);
-      myMotorB = kit1.getStepper(200, 1);
-      myMotorC = kit2.getStepper(200, 2);
+      
       int set_value[3] = {10,10,10};
       int positions[3] ={0,0,0};
-      Serial.begin(115200);
+      Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x60); 
+      Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70); 
+      myMotorA = kit2.getStepper(200, 2);
+      myMotorB = kit2.getStepper(200, 1);
+      myMotorC = kit1.getStepper(200, 2);
+      kit1.begin();
+      kit2.begin();
+      
+      setSpeeds(100,100,100);
+      
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) {
       myMotorA->setSpeed(rpm1);
@@ -46,19 +50,20 @@ class RigControl {
     }
     void move(int x, int y, int z) { // move the steppers based on direction, but not if pushing against wall
       int* states = readButtons();
-      if(x>0 && states[0]==0){myMotorA->step(abs(x), FORWARD, SINGLE); }
-      else{myMotorA->step(abs(x), BACKWARD, SINGLE); }
-      if(y>0 && states[1]==0){myMotorB->step(abs(y), FORWARD, SINGLE); }
-      else{myMotorB->step(abs(y), BACKWARD, SINGLE); }
-      if(z>0 && states[2]==0){myMotorC->step(abs(z), FORWARD, SINGLE); }
-      else{myMotorC->step(abs(z), BACKWARD, SINGLE); }
+      //Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
+      //Serial.print(x);Serial.print(y);Serial.println(z);
+      if(x>0 && states[0]==0){myMotorA->step(abs(x), FORWARD, DOUBLE); }
+      else{myMotorA->step(abs(x), BACKWARD, DOUBLE); }
+      if(y>0 && states[1]==0){myMotorB->step(abs(y), FORWARD, DOUBLE); }
+      else{myMotorB->step(abs(y), BACKWARD, DOUBLE); }
+      if(z>0 && states[2]==0){myMotorC->step(abs(z), FORWARD, DOUBLE); }
+      else{myMotorC->step(abs(z), BACKWARD, DOUBLE); }
       //update memory of position
       positions[0]+=x;
       positions[1]+=y;
       positions[2]+=z;
     }
     void zero(){ // return to states
-      Serial.println("MOVING TO ZERO");
       int moveX=positions[0]*-1;
       int moveY=positions[1]*-1;
       int moveZ=positions[2]*-1;
