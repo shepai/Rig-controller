@@ -56,10 +56,7 @@ class RigControl {
       // Store directions and total steps
       int steps[3] = {abs(x), abs(y), abs(z)};
       int dir[3] = {x > 0 ? FORWARD : BACKWARD, y > 0 ? FORWARD : BACKWARD, z > 0 ? FORWARD : BACKWARD};
-      // Prevent movement if blocked by limits
-      for (int i = 0; i < 3; i++) {
-        if (states[i] != 0) steps[i] = 0;
-      }
+      
       //find the motor with the most steps
       int max_steps = max(steps[0], max(steps[1], steps[2]));
       int accum[3] = {0, 0, 0};
@@ -73,6 +70,11 @@ class RigControl {
               if (j == 0) myMotorA->step(1, dir[0], DOUBLE);
               if (j == 1) myMotorB->step(1, dir[1], DOUBLE);
               if (j == 2) myMotorC->step(1, dir[2], DOUBLE);
+            }
+            states = readButtons();
+            // Prevent movement if blocked by limits
+            for (int i = 0; i < 3; i++) {
+              if (states[i] != 0 && dir[i]==FORWARD) steps[i] = 0;
             }
           }
         } 
