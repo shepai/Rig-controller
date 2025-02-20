@@ -18,6 +18,8 @@ class RigControl {
     Adafruit_StepperMotor *myMotorA;
     Adafruit_StepperMotor *myMotorB;
     Adafruit_StepperMotor *myMotorC;
+    Adafruit_MotorShield kit1;
+    Adafruit_MotorShield kit2;
     int buttonX = 7;    // pushbutton connected to digital pin 
     int buttonY = 8;    // pushbutton connected to digital pin
     int buttonZ = 9;    // pushbutton connected to digital pin
@@ -32,16 +34,17 @@ class RigControl {
       
       int set_value[3] = {10,10,10};
       int positions[3] ={0,0,0};
-      Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x60); 
-      Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70); 
+      kit1 = Adafruit_MotorShield(0x60); 
+      kit2 = Adafruit_MotorShield(0x70); 
       myMotorA = kit2.getStepper(200, 2);
       myMotorB = kit2.getStepper(200, 1);
       myMotorC = kit1.getStepper(200, 2);
-      kit1.begin();
-      kit2.begin();
-      
       setSpeeds(100,100,100);
       
+    }
+    void init() {
+      kit1.begin();
+      kit2.begin();
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) {
       myMotorA->setSpeed(rpm1);

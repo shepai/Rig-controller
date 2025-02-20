@@ -3,7 +3,7 @@
 RigControl rig; //= RigControl(); // Use pin 13 for the LED
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(921600);
   Serial.print("Loaded Rig...");
   Serial.println("Scanning I2C bus...");
   Wire.begin();  // Start I2C communication
@@ -20,10 +20,11 @@ void setup() {
   delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
   rig=RigControl(); 
+  rig.init();
 }
 
 void loop() {
-
+  
     String command = "";
     char incomingChar = "";
     while (incomingChar != '\n') {
@@ -41,7 +42,9 @@ void loop() {
       ProcessCommand(command);
       flash();
     }
+    
 }
+
 void flash() {
   digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
   delay(100);                      // wait for a second
