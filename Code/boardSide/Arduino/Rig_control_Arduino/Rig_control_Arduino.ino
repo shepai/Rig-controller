@@ -43,7 +43,6 @@ void loop() {
       ProcessCommand(command);
       flash();
     }
-    
 }
 
 void flash() {

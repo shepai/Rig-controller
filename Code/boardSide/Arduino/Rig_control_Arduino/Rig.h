@@ -43,8 +43,8 @@ class RigControl {
       
     }
     void init() { //init seperate to main load up to avoid interference with serial communication
-      kit1.begin();
       kit2.begin();
+      kit1.begin();
     }
     void setSpeeds(int rpm1, int rpm2, int rpm3) { //set the speeds of each motor
       myMotorA->setSpeed(rpm1);
@@ -74,7 +74,7 @@ class RigControl {
             states = readButtons();
             // Prevent movement if blocked by limits
             for (int i = 0; i < 3; i++) {
-              if (states[i] != 0 && dir[i]==FORWARD) steps[i] = 0;
+              if (states[i] != 0 && ((dir[i]==FORWARD && i<2) || (dir[i]==BACKWARD && i==2))) steps[i] = 0;
             }
           }
         } 
@@ -114,7 +114,7 @@ class RigControl {
       static int buttonStates[3];  // Static array to keep data after function exits
       buttonStates[0] = digitalRead(buttonX);
       buttonStates[1] = digitalRead(buttonY);
-      buttonStates[2] = digitalRead(buttonZ);
+      buttonStates[2] = digitalRead(buttonZ); //1 - to offset the fact that negative moves motor towards
       return buttonStates;  // Return the array
   }
   void recalibrate() {
