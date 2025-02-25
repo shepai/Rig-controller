@@ -22,10 +22,15 @@ class experiment:
         # Set up secondary sensor
         ####################
         print("Connecting to sensor")
-        cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            print("Error: Unable to access the webcam.")
-            exit()
+        connected=False
+        i=0
+        while not connected:
+            cap = cv2.VideoCapture(i)
+            if not cap.isOpened():
+                print("Error: Unable to access the webcam.")
+                i+=1
+            else:
+                connected=True
         ret, frame = cap.read()
         print("COMPONENTS",frame.shape)
 
