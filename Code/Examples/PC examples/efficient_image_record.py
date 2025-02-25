@@ -16,7 +16,7 @@ class experiment:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-350  #-350 for normal 
+        Pressure_extra=-350  #-380 for normal 
         c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
