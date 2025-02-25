@@ -14,10 +14,10 @@ class experiment:
         clear = lambda: os.system('clear')
         path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
         path_to_save="/home/dexter/Documents/data/"
-        c= Controller.Controller("/dev/ttyACM1",file=path)
+        c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=0  #-200 for carpet #-100 for plastic #0 for normal #-350 for cork#350 for foam #-10 for pressurepad
-        c.calibrate(value=THRESH,lower=False,val=10) #takes a while - only want to do once
+        Pressure_extra=200  #-200 for carpet #-100 for plastic #0 for normal #-350 for cork#350 for foam #-10 for pressurepad
+        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
         ####################
@@ -34,7 +34,7 @@ class experiment:
         #Experiment hyperparameters
         ####################
         num_experiments=1
-        num_of_trials=100
+        num_of_trials=4
         starttime=time.time()
         total_operations=(num_of_trials*(len(np.arange(0,1,0.1))**2))*num_experiments
         EDGE_VALUE=0
