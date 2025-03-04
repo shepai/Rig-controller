@@ -16,7 +16,7 @@ void setup() {
       Serial.println(i, HEX);
     }
   }
-  delay(500);
+
   pinMode(LED_BUILTIN, OUTPUT);
   //rig=RigControl(); 
   rig.init();

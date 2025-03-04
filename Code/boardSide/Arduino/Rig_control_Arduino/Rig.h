@@ -1,39 +1,52 @@
 // rig controller lib
+#include <Wire.h>
 #include <Adafruit_MotorShield.h>
-#include "Adafruit_PWMServoDriver.h"
 
-#ifndef LEDCONTROL_H
-#define LEDCONTROL_H
-
-Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x61); 
-Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70);
-Adafruit_StepperMotor *myMotorA = kit2.getStepper(180, 2);
-Adafruit_StepperMotor *myMotorB = kit2.getStepper(180, 1);
-Adafruit_StepperMotor *myMotorC = kit1.getStepper(200, 1);
 // Positions and speeds
 int positions[3] = {0, 0, 0};  // class member, initialize outside constructor
 int set_value[3] = {10, 10, 10};  // class member
+
+int sumArray(int arr[], int size) {
+  int sum = 0;
+  
+  for (int i = 0; i < size; i++) {
+    sum += arr[i];
+  }
+  
+  return sum;
+}
 
 class RigControl {
   private:
     int buttonY = 7;    // pushbutton connected to digital pin 
     int buttonX = 8;    // pushbutton connected to digital pin
     int buttonZ = 9;    // pushbutton connected to digital pin
+  Adafruit_MotorShield kit1; 
+  Adafruit_MotorShield kit2;
+  Adafruit_StepperMotor *myMotorA;
+  Adafruit_StepperMotor *myMotorB;
+  Adafruit_StepperMotor *myMotorC;
   public:
     // Constructor
     RigControl() {
       pinMode(buttonX, INPUT);
       pinMode(buttonY, INPUT);
       pinMode(buttonZ, INPUT);
-      setSpeeds(0, 0, 0);
+      //setSpeeds(0, 0, 0);
       
     }
 
     void init() { 
-      kit2.begin();
+      kit1 = Adafruit_MotorShield(0x61); 
+      kit2 = Adafruit_MotorShield(0x60); 
       delay(100);
       kit1.begin();
       delay(100);
+      kit2.begin();
+      delay(100);
+      myMotorA = kit2.getStepper(180, 2);
+      myMotorB = kit2.getStepper(180, 1);
+      myMotorC = kit1.getStepper(200, 1);
       setSpeeds(100, 100, 100); // Initial speeds set here
     }
 
@@ -43,40 +56,30 @@ class RigControl {
       myMotorC->setSpeed(rpm3);
     }
 
-
     void move(int x, int y, int z) {
       int* states = readButtons();
       // Store directions and total steps
       int steps[3] = {abs(x), abs(y), abs(z)};
       int dir[3] = {x > 0 ? FORWARD : BACKWARD, y > 0 ? FORWARD : BACKWARD, z > 0 ? FORWARD : BACKWARD};
       // Move each motor one at a time
-      
-      for (int j = 0; j < 3; j++) {
-        int remainingSteps = steps[j];
-        while (remainingSteps > 0) {
+      while (sumArray(steps,3) > 0) {
+        int remainingSteps=0;
+        for (int j = 0; j < 3; j++) {
+          remainingSteps = steps[j];
           // Move one step for each motor
           if (remainingSteps > 0) {
-            if (j == 0) {myMotorA->step(1, dir[0], DOUBLE);}
-            else if (j == 1) {setSpeeds(100, 100, 0);myMotorB->step(1, dir[1], DOUBLE);setSpeeds(100, 100, 100);}
-            else if (j == 2) {
-              setSpeeds(100, 0, 100);
-              myMotorC->step(1, dir[2], DOUBLE);setSpeeds(100, 100, 100);}
-            remainingSteps--;
+            if (j == 0) {myMotorA->step(1, dir[0], DOUBLE);positions[0] += 1;}
+            else if (j == 1) {myMotorB->step(1, dir[1], DOUBLE);positions[1] += 1;}
+            else if (j == 2) {myMotorC->step(1, dir[2], DOUBLE);positions[2] += 1;}
+            steps[j]=remainingSteps-1;
           }
-
-          // Update button states and prevent movement if blocked
           states = readButtons();
-          for (int i = 0; i < 3; i++) {
-            if (states[i] != 0 && ((dir[i] == FORWARD && i < 2) || (dir[i] == BACKWARD && i == 2))) {
-              remainingSteps = 0;  // Stop movement if blocked
-            }
-          }
+          if (states[j]==1 && dir[j]==FORWARD && j<2){steps[j] = 0;}
+          else if (states[j]==1 && dir[j]==BACKWARD && j==2){steps[j] = 0;}
+          
+          
         }
       }
-      // Update memory of position
-      positions[0] += x;
-      positions[1] += y;
-      positions[2] += z;
     }
 
     void zero() { 
@@ -90,8 +93,11 @@ class RigControl {
     void reset() {
       int movearray[3] = {0, 0, 0};
       int* states = readButtons();
-      while (!(states[0] == 1 && states[1] == 1 && states[2] == 1)) {
+      while (true) {
         states = readButtons();
+        if (states[0] == 1 && states[1] == 1 && states[2] == 1){
+          break;
+        }
         movearray[0] = 0; movearray[1] = 0; movearray[2] = 0;
         if (states[0] == 0) {
           movearray[0] = 10;
@@ -100,8 +106,9 @@ class RigControl {
           movearray[1] = 10;
         }
         if (states[2] == 0) {
-          movearray[2] = 10;
+          movearray[2] = -10;
         }
+        
         move(movearray[0], movearray[1], movearray[2]);
       }
     }
@@ -124,4 +131,3 @@ class RigControl {
     }
 };
 
-#endif
