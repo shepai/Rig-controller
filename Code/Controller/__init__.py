@@ -163,7 +163,7 @@ class Controller:
 class Arduino_Rig:
     def __init__(self,COM="/dev/ttyACM0"):
         # Set up serial connection (adjust 'COM3' to your port and baudrate to match Arduino)
-        self.arduino = serial.Serial(port=COM, baudrate=115200, timeout=1)
+        self.arduino = serial.Serial(port=COM, baudrate=921600, timeout=1)
         time.sleep(2)  # Allow time for Arduino to reset
 
     def send_command(self,command):
@@ -180,18 +180,29 @@ class Arduino_Rig:
                     break
 
     def reset_trial(self):
-        self.send_command_await("RESET")
+        self.send_command_await("ZERO")
 
     def calibrate(self,value=7500,lower=True,val=0):
-        self.send_command_await("CALIB-100,100,"+str(val))
+        self.send_command_await("CALIB")
+        self.send_command_await("MOVE,0,0,"+str(val+700))
 
     def reset(self):
-        pass
+        self.send_command_await("RESET")
 
     def move(self,x,y,z):
-        self.send_command_await("MOVE-"+str(x)+","+str(y)+","+str(z))
-
+        self.send_command_await("MOVE,"+str(x)+","+str(y)+","+str(z))
+    def reset_trial(self):
+        self.send_command_await("ZERO")
 if __name__ == "__main__":
+    start=time.time()
     arduino_test=Arduino_Rig()
+    arduino_test.reset()
+    print("reset device")
     arduino_test.calibrate()
+    print("calibrated")
+    arduino_test.move(-1000,100,100)
+    print("moved")
+    arduino_test.reset_trial()
+    print("returned to state")
+    print("setup time:",(time.time()-start)/60,"minutes")
     #arduino_test.move(10,10,10)
