@@ -4,7 +4,7 @@
 
 // Positions and speeds
 int positions[3] = {0, 0, 0};  // class member, initialize outside constructor
-int set_value[3] = {-2200, -6000, 600};  // class member
+int set_value[3] = {-3400, -6000, 600};  // class member
 
 int sumArray(int arr[], int size) {
   int sum = 0;
@@ -19,7 +19,7 @@ int sumArray(int arr[], int size) {
 class RigControl {
   private:
     int buttonY = 7;    // pushbutton connected to digital pin 
-    int buttonX = 8;    // pushbutton connected to digital pin
+    int buttonX = 6;    // pushbutton connected to digital pin
     int buttonZ = 9;    // pushbutton connected to digital pin
   Adafruit_MotorShield kit1; 
   Adafruit_MotorShield kit2;
@@ -68,10 +68,10 @@ class RigControl {
           remainingSteps = steps[j];
           // Move one step for each motor
           if (remainingSteps > 0) {
-            if (j == 0) {myMotorA->step(1, dir[0], DOUBLE);positions[0] += 1;}
-            else if (j == 1) {myMotorB->step(1, dir[1], DOUBLE);positions[1] += 1;}
-            else if (j == 2) {myMotorC->step(1, dir[2], DOUBLE);positions[2] += 1;}
-            steps[j]=remainingSteps-1;
+            if (j == 0) {myMotorA->step(10, dir[0], DOUBLE);positions[0] += 1;}
+            else if (j == 1) {myMotorB->step(10, dir[1], DOUBLE);positions[1] += 1;}
+            else if (j == 2) {myMotorC->step(10, dir[2], DOUBLE);positions[2] += 1;}
+            steps[j]=remainingSteps-10;
           }
           states = readButtons();
           if (states[j]==1 && dir[j]==FORWARD && j<2){steps[j] = 0;}
@@ -109,6 +109,7 @@ class RigControl {
 
     int* readButtons() {
       static int buttonStates[3];  // Static array to keep data after function exits
+      delay(10);
       buttonStates[0] = digitalRead(buttonX);
       buttonStates[1] = digitalRead(buttonY);
       buttonStates[2] = digitalRead(buttonZ); 
