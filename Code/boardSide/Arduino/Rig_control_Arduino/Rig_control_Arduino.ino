@@ -1,5 +1,4 @@
 #include "Rig.h"
-#include <Wire.h>
 RigControl rig; //= RigControl(); // Use pin 13 for the LED
 
 void setup() {
@@ -19,9 +18,9 @@ void setup() {
   }
   delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
-  rig=RigControl(); 
+  //rig=RigControl(); 
   rig.init();
-  //rig.move(10,10,10);
+
 }
 
 void loop() {

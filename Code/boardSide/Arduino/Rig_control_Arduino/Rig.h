@@ -1,126 +1,127 @@
 // rig controller lib
-#include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "Adafruit_PWMServoDriver.h"
 
 #ifndef LEDCONTROL_H
 #define LEDCONTROL_H
-Adafruit_StepperMotor *myMotorA;
-Adafruit_StepperMotor *myMotorB;
-Adafruit_StepperMotor *myMotorC;
-Adafruit_MotorShield kit1;
-Adafruit_MotorShield kit2;
-int sumArray(int arr[]) {
-    int sum = 0;
-    for (int i = 0; i < sizeof(arr); ++i)
-        sum += arr[i];
-    return sum;
-}
+
+Adafruit_MotorShield kit1 = Adafruit_MotorShield(0x61); 
+Adafruit_MotorShield kit2 = Adafruit_MotorShield(0x70);
+Adafruit_StepperMotor *myMotorA = kit2.getStepper(180, 2);
+Adafruit_StepperMotor *myMotorB = kit2.getStepper(180, 1);
+Adafruit_StepperMotor *myMotorC = kit1.getStepper(200, 1);
+// Positions and speeds
+int positions[3] = {0, 0, 0};  // class member, initialize outside constructor
+int set_value[3] = {10, 10, 10};  // class member
 
 class RigControl {
   private:
-    
     int buttonY = 7;    // pushbutton connected to digital pin 
     int buttonX = 8;    // pushbutton connected to digital pin
     int buttonZ = 9;    // pushbutton connected to digital pin
-    int* positions;
-    int * set_value;
   public:
     // Constructor
     RigControl() {
       pinMode(buttonX, INPUT);
       pinMode(buttonY, INPUT);
       pinMode(buttonZ, INPUT);
-      
-      int set_value[3] = {10,10,10};
-      int positions[3] ={0,0,0};
-      kit1 = Adafruit_MotorShield(0x60); 
-      kit2 = Adafruit_MotorShield(0x70); 
-      myMotorA = kit2.getStepper(200, 2);
-      myMotorB = kit2.getStepper(200, 1);
-      myMotorC = kit1.getStepper(200, 2);
-      setSpeeds(100,100,100);
+      setSpeeds(0, 0, 0);
       
     }
-    void init() { //init seperate to main load up to avoid interference with serial communication
+
+    void init() { 
       kit2.begin();
+      delay(100);
       kit1.begin();
+      delay(100);
+      setSpeeds(100, 100, 100); // Initial speeds set here
     }
-    void setSpeeds(int rpm1, int rpm2, int rpm3) { //set the speeds of each motor
+
+    void setSpeeds(int rpm1, int rpm2, int rpm3) { 
       myMotorA->setSpeed(rpm1);
       myMotorB->setSpeed(rpm2);
       myMotorC->setSpeed(rpm3);
     }
+
+
     void move(int x, int y, int z) {
       int* states = readButtons();
       // Store directions and total steps
       int steps[3] = {abs(x), abs(y), abs(z)};
       int dir[3] = {x > 0 ? FORWARD : BACKWARD, y > 0 ? FORWARD : BACKWARD, z > 0 ? FORWARD : BACKWARD};
+      // Move each motor one at a time
       
-      //find the motor with the most steps
-      int max_steps = max(steps[0], max(steps[1], steps[2]));
-      int accum[3] = {0, 0, 0};
-      for (int i = 0; i < max_steps; i++) {
-        // Move each motor proportionally
-        for (int j = 0; j < 3; j++) {
-          if (steps[j] > 0) {
-            accum[j] += steps[j];
-            if (accum[j] >= max_steps) {
-              accum[j] -= max_steps;
-              if (j == 0) myMotorA->step(1, dir[0], DOUBLE);
-              if (j == 1) myMotorB->step(1, dir[1], DOUBLE);
-              if (j == 2) myMotorC->step(1, dir[2], DOUBLE);
-            }
-            states = readButtons();
-            // Prevent movement if blocked by limits
-            for (int i = 0; i < 3; i++) {
-              if (states[i] != 0 && ((dir[i]==FORWARD && i<2) || (dir[i]==BACKWARD && i==2))) steps[i] = 0;
+      for (int j = 0; j < 3; j++) {
+        int remainingSteps = steps[j];
+        while (remainingSteps > 0) {
+          // Move one step for each motor
+          if (remainingSteps > 0) {
+            if (j == 0) {myMotorA->step(1, dir[0], DOUBLE);}
+            else if (j == 1) {setSpeeds(100, 100, 0);myMotorB->step(1, dir[1], DOUBLE);setSpeeds(100, 100, 100);}
+            else if (j == 2) {
+              setSpeeds(100, 0, 100);
+              myMotorC->step(1, dir[2], DOUBLE);setSpeeds(100, 100, 100);}
+            remainingSteps--;
+          }
+
+          // Update button states and prevent movement if blocked
+          states = readButtons();
+          for (int i = 0; i < 3; i++) {
+            if (states[i] != 0 && ((dir[i] == FORWARD && i < 2) || (dir[i] == BACKWARD && i == 2))) {
+              remainingSteps = 0;  // Stop movement if blocked
             }
           }
-        } 
+        }
       }
       // Update memory of position
       positions[0] += x;
       positions[1] += y;
       positions[2] += z;
     }
-    void zero(){ // return to states
-      int moveX=positions[0]*-1;
-      int moveY=positions[1]*-1;
-      int moveZ=positions[2]*-1;
-      move(moveX,moveY,moveZ);
+
+    void zero() { 
+      int moveX = positions[0] * -1;
+      int moveY = positions[1] * -1;
+      int moveZ = positions[2] * -1;
+      move(moveX, moveY, moveZ);
       memset(positions, 0, sizeof(positions));  // Set all values to 0
     }
-    void reset(){ //reset the rig till all buttons are suppressed
-      int movearray[3] = {0,0,0};
+
+    void reset() {
+      int movearray[3] = {0, 0, 0};
       int* states = readButtons();
-      while(sumArray(states)!=0) { //loop till all rig features are stuck
+      while (!(states[0] == 1 && states[1] == 1 && states[2] == 1)) {
         states = readButtons();
-        movearray[0]=0; movearray[1]=0; movearray[2]=0;
-        if(states[0]) {
-          movearray[0]=10;
-        }if(states[1]) {
-          movearray[1]=10;
-        }if(states[2]) {
-          movearray[2]=10;
+        movearray[0] = 0; movearray[1] = 0; movearray[2] = 0;
+        if (states[0] == 0) {
+          movearray[0] = 10;
         }
+        if (states[1] == 0) {
+          movearray[1] = 10;
+        }
+        if (states[2] == 0) {
+          movearray[2] = 10;
+        }
+        move(movearray[0], movearray[1], movearray[2]);
       }
     }
-    void centre(int x, int y, int z) { //center the rig
-      move(x,y,z);
-      positions[0]=0; positions[1]=0; positions[2]=0;
+
+    void centre(int x, int y, int z) { 
+      move(x, y, z);
+      positions[0] = 0; positions[1] = 0; positions[2] = 0;
     }
-    int *readButtons() {
+
+    int* readButtons() {
       static int buttonStates[3];  // Static array to keep data after function exits
       buttonStates[0] = digitalRead(buttonX);
       buttonStates[1] = digitalRead(buttonY);
-      buttonStates[2] = digitalRead(buttonZ); //1 - to offset the fact that negative moves motor towards
-      return buttonStates;  // Return the array
-  }
-  void recalibrate() {
-    move(set_value[0],set_value[1],set_value[2]);
-  }
+      buttonStates[2] = digitalRead(buttonZ); 
+      return buttonStates;
+    }
 
+    void recalibrate() {
+      move(set_value[0], set_value[1], set_value[2]);
+    }
 };
 
 #endif
