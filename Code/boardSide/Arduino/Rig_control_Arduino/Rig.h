@@ -4,7 +4,7 @@
 
 // Positions and speeds
 int positions[3] = {0, 0, 0};  // class member, initialize outside constructor
-int set_value[3] = {10, 10, 10};  // class member
+int set_value[3] = {-2200, -6000, 600};  // class member
 
 int sumArray(int arr[], int size) {
   int sum = 0;
@@ -76,18 +76,8 @@ class RigControl {
           states = readButtons();
           if (states[j]==1 && dir[j]==FORWARD && j<2){steps[j] = 0;}
           else if (states[j]==1 && dir[j]==BACKWARD && j==2){steps[j] = 0;}
-          
-          
         }
       }
-    }
-
-    void zero() { 
-      int moveX = positions[0] * -1;
-      int moveY = positions[1] * -1;
-      int moveZ = positions[2] * -1;
-      move(moveX, moveY, moveZ);
-      memset(positions, 0, sizeof(positions));  // Set all values to 0
     }
 
     void reset() {
@@ -113,8 +103,7 @@ class RigControl {
       }
     }
 
-    void centre(int x, int y, int z) { 
-      move(x, y, z);
+    void centre() { 
       positions[0] = 0; positions[1] = 0; positions[2] = 0;
     }
 
@@ -125,9 +114,12 @@ class RigControl {
       buttonStates[2] = digitalRead(buttonZ); 
       return buttonStates;
     }
-
-    void recalibrate() {
+    void zero() {
+      move(positions[0]*-1,positions[1]*-1,positions[2]*-1);
+    }
+    void calibrate() {
       move(set_value[0], set_value[1], set_value[2]);
+      centre();
     }
 };
 

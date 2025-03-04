@@ -52,11 +52,9 @@ void flash() {
 }
 void ProcessCommand(String command) {
   Serial.println(command);
-  if (command.startsWith("CALIB-")) {
-      int x, y, z;
-      sscanf(command.c_str(), "CALIB-%d-%d-%d", &x, &y, &z);
-      rig.move(x, y, z);
+  if (command.startsWith("CALIB")) {
       Serial.println("Calibration");
+      rig.calibrate();
       Serial.println("done");
   } else if (command == "ZERO") {
       Serial.println("Zeroing device");
