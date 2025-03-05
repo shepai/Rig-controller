@@ -26,6 +26,7 @@ class RigControl {
   Adafruit_StepperMotor *myMotorA;
   Adafruit_StepperMotor *myMotorB;
   Adafruit_StepperMotor *myMotorC;
+  int step=30;
   public:
     // Constructor
     RigControl() {
@@ -55,7 +56,9 @@ class RigControl {
       myMotorB->setSpeed(rpm2);
       myMotorC->setSpeed(rpm3);
     }
-
+    void setStep(int st){
+      step=st;
+    }
     void move(int x, int y, int z) {
       int* states = readButtons();
       // Store directions and total steps
@@ -68,10 +71,10 @@ class RigControl {
           remainingSteps = steps[j];
           // Move one step for each motor
           if (remainingSteps > 0) {
-            if (j == 0) {myMotorA->step(10, dir[0], DOUBLE);positions[0] += 1;}
-            else if (j == 1) {myMotorB->step(10, dir[1], DOUBLE);positions[1] += 1;}
-            else if (j == 2) {myMotorC->step(10, dir[2], DOUBLE);positions[2] += 1;}
-            steps[j]=remainingSteps-10;
+            if (j == 0) {myMotorA->step(step, dir[0], DOUBLE);positions[0] += step;}
+            else if (j == 1) {myMotorB->step(step, dir[1], DOUBLE);positions[1] += step;}
+            else if (j == 2) {myMotorC->step(step, dir[2], DOUBLE);positions[2] += step;}
+            steps[j]=remainingSteps-step;
           }
           states = readButtons();
           if (states[j]==1 && dir[j]==FORWARD && j<2){steps[j] = 0;}
@@ -90,13 +93,13 @@ class RigControl {
         }
         movearray[0] = 0; movearray[1] = 0; movearray[2] = 0;
         if (states[0] == 0) {
-          movearray[0] = 10;
+          movearray[0] = 30;
         }
         if (states[1] == 0) {
-          movearray[1] = 10;
+          movearray[1] = 30;
         }
         if (states[2] == 0) {
-          movearray[2] = -10;
+          movearray[2] = -30;
         }
         
         move(movearray[0], movearray[1], movearray[2]);
