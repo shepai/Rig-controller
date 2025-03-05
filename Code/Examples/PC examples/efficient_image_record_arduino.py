@@ -3,7 +3,7 @@ sys.path.insert(1, '/home/dexter/Documents/Rig-controller/Code/')
 sys.path.insert(1, '/home/dexter/Documents/TactileSensor/Code') 
 ###################################################
 import time
-import Controller
+from Controller import Arduino_Rig as Controller
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,10 +14,11 @@ class experiment:
         clear = lambda: os.system('clear')
         path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
         path_to_save="/home/dexter/Documents/data/"
-        c= Controller.Controller("/dev/ttyACM0",file=path)
-        THRESH=6000
-        Pressure_extra=-400  #-400 for normal 
-        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
+        c= Controller("/dev/ttyACM0")
+        THRESH=0
+        Pressure_extra=0  #-400 for normal 
+        #c.reset()
+        #c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
         ####################
@@ -48,7 +49,8 @@ class experiment:
                     global sensor
                     global filename
                     c.reset_trial() #return to center position
-                    c.move(EDGE_VALUE+0,50,50-FORCE,0)
+                    print("zero done")
+                    #c.move(EDGE_VALUE+0,50,50-FORCE,0)
                     #move sensor across surface
                     t1=time.time()
                     x_vector=10*dirs[0]
@@ -56,7 +58,7 @@ class experiment:
                     ret, frame = cap.read()
                     ar=np.zeros((100,*frame.shape),dtype=np.uint8)
                     for i in range(0,100):
-                        c.move(x_vector,y_vector,0,0)
+                        c.move(x_vector,y_vector,0,0,step=1)
                         ret, frame = cap.read()
                         if not ret:
                             print("incorrect")
@@ -80,13 +82,12 @@ class experiment:
                         print("CURRENT EXECUTION TIME:",(time.time()-starttime)/(60),"minutes","\n\tEstimated time left:",
                             (time_taken*total_operations_left)/(60*60),"hours")                           
                         try:
-
                             dat=runTrial(experiment,dirs=[x,y]) #send vector through
                             data[exp][trial][i][j]=dat.copy()
-                            c.move(0,0,500,0)
+                            c.move(0,0,-100,0)
                         except KeyboardInterrupt:
                             c.reset_trial()
-                            c.move(0,0,1000,0)
+                            c.move(0,0,-500,0)
                             print("Paused... do you want to continue (ENTER yes ctrl-C no)")
                             input(">")
                 if trial%10==0:
