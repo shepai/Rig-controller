@@ -184,15 +184,16 @@ class Arduino_Rig:
 
     def calibrate(self,value=7500,lower=True,val=0):
         self.send_command_await("CALIB")
-        self.send_command_await("MOVE,0,0,"+str(val+700))
-
+        self.send_command_await("MOVE,0,0,"+str(val)+",2")
+        self.send_command_await("CENTRE")
     def reset(self):
         self.send_command_await("RESET")
 
-    def move(self,x,y,z):
-        self.send_command_await("MOVE,"+str(x)+","+str(y)+","+str(z))
+    def move(self,x,y,z,a,step=30):
+        self.send_command_await("MOVE,"+str(int(x))+","+str(int(y))+","+str(int(z))+","+str(step))
     def reset_trial(self):
         self.send_command_await("ZERO")
+
 if __name__ == "__main__":
     start=time.time()
     arduino_test=Arduino_Rig()

@@ -63,8 +63,9 @@ void ProcessCommand(String command) {
       Serial.println("done");
   } else if (command.startsWith("MOVE,")) {
       Serial.println("Moving rig...");
-      int x, y, z;
-      sscanf(command.c_str(), "MOVE,%d,%d,%d", &x, &y, &z);
+      int x, y, z, st;
+      sscanf(command.c_str(), "MOVE,%d,%d,%d,%d", &x, &y, &z, &st);
+      rig.setStep(st);
       rig.move(x, y, z);
       Serial.println("done");
   } else if (command=="RESET") {
@@ -74,6 +75,9 @@ void ProcessCommand(String command) {
   }else if (command=="SHOW") {
       int* states = rig.readButtons();
       Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
+      Serial.println("done");
+  }else if (command=="CENTRE") {
+      rig.centre();
       Serial.println("done");
   }else {
       Serial.println("Unknown command");

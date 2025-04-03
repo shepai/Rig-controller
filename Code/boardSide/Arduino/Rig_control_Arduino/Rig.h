@@ -4,7 +4,7 @@
 
 // Positions and speeds
 int positions[3] = {0, 0, 0};  // class member, initialize outside constructor
-int set_value[3] = {-3400, -6000, 600};  // class member
+int set_value[3] = {-4400, -8000, 600};  // class member
 
 int sumArray(int arr[], int size) {
   int sum = 0;
@@ -26,7 +26,7 @@ class RigControl {
   Adafruit_StepperMotor *myMotorA;
   Adafruit_StepperMotor *myMotorB;
   Adafruit_StepperMotor *myMotorC;
-  int step=30;
+  int step=2;
   public:
     // Constructor
     RigControl() {
@@ -75,6 +75,7 @@ class RigControl {
             else if (j == 1) {myMotorB->step(step, dir[1], DOUBLE);positions[1] += step;}
             else if (j == 2) {myMotorC->step(step, dir[2], DOUBLE);positions[2] += step;}
             steps[j]=remainingSteps-step;
+            if (steps[j]<0){steps[j]=0;}
           }
           states = readButtons();
           if (states[j]==1 && dir[j]==FORWARD && j<2){steps[j] = 0;}

@@ -16,7 +16,7 @@ class experiment:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-400  #-400 for normal 
+        Pressure_extra=-880  #-480 for normal -880 for foam -230 for cork and carpets
         c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
@@ -40,7 +40,7 @@ class experiment:
         #Experiment hyperparameters
         ####################
         num_experiments=1
-        num_of_trials=4
+        num_of_trials=2
         starttime=time.time()
         total_operations=(num_of_trials*(len(np.arange(0,1,0.1))**2))*num_experiments
         EDGE_VALUE=0
@@ -54,8 +54,8 @@ class experiment:
                     x_vector=10*dirs[0]
                     y_vector=10*dirs[1]
                     ret, frame = cap.read()
-                    ar=np.zeros((100,*frame.shape),dtype=np.uint8)
-                    for i in range(0,100):
+                    ar=np.zeros((50,*frame.shape),dtype=np.uint8)
+                    for i in range(0,50):
                         c.move(x_vector,y_vector,0,0)
                         ret, frame = cap.read()
                         if not ret:
@@ -68,7 +68,7 @@ class experiment:
                         if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
                     return ar
-        data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.1)),len(np.arange(0,1,0.1)),100,*frame.shape),dtype=np.uint8)
+        data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.1)),len(np.arange(0,1,0.1)),50,*frame.shape),dtype=np.uint8)
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
                 for i,y in enumerate(np.arange(0,1,0.1)): #move y along surface 
