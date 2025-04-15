@@ -18,7 +18,6 @@ class experiment:
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
         Pressure_extra=-230  #-480 for normal -880 for foam -230 for cork and carpets
-        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
         ####################
@@ -39,12 +38,14 @@ class experiment:
             self.B=ts.Board()
             #get serial boards and connect to first one
             print("Connecting to sensor")
-            self.B.connect("/dev/ttyACM1")
+            self.B.connect("/dev/ttyACM2")
             print("Running file")
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
-            frame=np.array(list(self.B.getSensor(type_="round",num=16)))
+            frame=np.array(list(self.B.getSensor(type_="round",num=16)))#
+            Pressure_extra-=200
         self.presstip=presstip
+        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",frame.shape)
 
 
@@ -65,7 +66,13 @@ class experiment:
                     t1=time.time()
                     x_vector=10*dirs[0]
                     y_vector=10*dirs[1]
-                    ret, frame = cap.read()
+                    if not self.presstip:
+                        ret, frame = cap.read()
+                        if not ret:
+                            print("incorrect")
+                            frame=np.zeros((100,100))
+                    else:
+                        frame=np.array(list(self.B.getSensor(type_="round",num=16)))
                     ar=np.zeros((50,*frame.shape),dtype=np.uint8)
                     for i in range(0,50):
                         c.move(x_vector,y_vector,0,0)
@@ -118,8 +125,7 @@ class experiment_circle:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-500  #-480 for normal -880 for foam -230 for cork and carpets -500 for flat
-        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
+        Pressure_extra=-230  #-480 for normal -880 for foam -230 for cork and carpets -500 for flat
         #####################
         # Set up secondary sensor
         ####################
@@ -140,12 +146,14 @@ class experiment_circle:
             self.B=ts.Board()
             #get serial boards and connect to first one
             print("Connecting to sensor")
-            self.B.connect("/dev/ttyACM1")
+            self.B.connect("/dev/ttyACM2")
             print("Running file")
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
             frame=np.array(list(self.B.getSensor(type_="round",num=16)))
+            Pressure_extra-=200
         self.presstip=presstip
+        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",frame.shape)
 
 
@@ -164,7 +172,13 @@ class experiment_circle:
                     c.move(EDGE_VALUE+0,50,50-FORCE,0)
                     #move sensor across surface
                     t1=time.time()
-                    ret, frame = cap.read()
+                    if not self.presstip:
+                        ret, frame = cap.read()
+                        if not ret:
+                            print("incorrect")
+                            frame=np.zeros((100,100))
+                    else:
+                        frame=np.array(list(self.B.getSensor(type_="round",num=16)))
                     ar=np.zeros((50,*frame.shape),dtype=np.uint8)
                     for i,t in enumerate(np.arange(0,5,0.1)):
                         x = radius * np.sin(t)
@@ -219,8 +233,8 @@ class experiment_pressure:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-500  #-480 for normal -880 for foam -230 for cork and carpets, -500 flat
-        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
+        Pressure_extra=-230  #-480 for normal -880 for foam -230 for cork and carpets, -500 flat
+        
         #####################
         # Set up secondary sensor
         ####################
@@ -241,12 +255,14 @@ class experiment_pressure:
             self.B=ts.Board()
             #get serial boards and connect to first one
             print("Connecting to sensor")
-            self.B.connect("/dev/ttyACM1")
+            self.B.connect("/dev/ttyACM2")
             print("Running file")
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
             frame=np.array(list(self.B.getSensor(type_="round",num=16)))
+            Pressure_extra-=200
         self.presstip=presstip
+        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",frame.shape)
 
 
@@ -265,7 +281,13 @@ class experiment_pressure:
                     c.move(EDGE_VALUE+0,50,50-FORCE,0)
                     #move sensor across surface
                     t1=time.time()
-                    ret, frame = cap.read()
+                    if not self.presstip:
+                        ret, frame = cap.read()
+                        if not ret:
+                            print("incorrect")
+                            frame=np.zeros((100,100))
+                    else:
+                        frame=np.array(list(self.B.getSensor(type_="round",num=16)))
                     ar=np.zeros((50,*frame.shape),dtype=np.uint8)
                     increase=0
                     for i,t in enumerate(np.arange(0,5,0.1)):
