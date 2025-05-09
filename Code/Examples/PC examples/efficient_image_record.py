@@ -17,7 +17,7 @@ class experiment:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-230  #-480 for normal -880 for foam -230 for cork and carpets
+        Pressure_extra=-480  #-480 for normal -880 for foam -230 for cork and carpets
         #####################
         # Set up secondary sensor
         ####################
@@ -43,7 +43,7 @@ class experiment:
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
             frame=np.array(list(self.B.getSensor(type_="round",num=16)))#
-            Pressure_extra-=200
+            Pressure_extra-=400
         self.presstip=presstip
         c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",frame.shape)
@@ -125,7 +125,7 @@ class experiment_circle:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-230  #-480 for normal -880 for foam -230 for cork and carpets -500 for flat
+        Pressure_extra=-500  #-480 for normal -880 for foam -230 for cork and carpets -500 for flat
         #####################
         # Set up secondary sensor
         ####################
@@ -151,7 +151,7 @@ class experiment_circle:
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
             frame=np.array(list(self.B.getSensor(type_="round",num=16)))
-            Pressure_extra-=200
+            Pressure_extra-=400
         self.presstip=presstip
         c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",frame.shape)
@@ -233,7 +233,7 @@ class experiment_pressure:
         path_to_save="/home/dexter/Documents/data/"
         c= Controller.Controller("/dev/ttyACM0",file=path)
         THRESH=6000
-        Pressure_extra=-230  #-480 for normal -880 for foam -230 for cork and carpets, -500 flat
+        Pressure_extra=-500  #-480 for normal -880 for foam -230 for cork and carpets, -500 flat
         
         #####################
         # Set up secondary sensor
@@ -260,7 +260,7 @@ class experiment_pressure:
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
             frame=np.array(list(self.B.getSensor(type_="round",num=16)))
-            Pressure_extra-=200
+            Pressure_extra-=400
         self.presstip=presstip
         c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",frame.shape)
