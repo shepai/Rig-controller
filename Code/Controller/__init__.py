@@ -189,7 +189,7 @@ class Arduino_Rig:
     def reset(self):
         self.send_command_await("RESET")
 
-    def move(self,x,y,z,a,step=30):
+    def move(self,x,y,z,a,step=5):
         self.send_command_await("MOVE,"+str(int(x))+","+str(int(y))+","+str(int(z))+","+str(step))
     def reset_trial(self):
         self.send_command_await("ZERO")
