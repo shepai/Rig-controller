@@ -18,8 +18,8 @@ class experiment:
         c= Controller("/dev/ttyACM1")
         THRESH=0
         Pressure_extra=935  #935 for normal, 450 for foam, 680 for carpet, 
-        #c.reset()
-        #c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
+        c.reset()
+        c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         #####################
         # Set up secondary sensor
         ####################
@@ -216,7 +216,7 @@ class experiment_circle:
                             c.move(0,0,-500,0)
                         except KeyboardInterrupt:
                             c.reset_trial()
-                            c.move(0,0,-1000,0)
+                            c.move(0,0,-500,0)
                             print("Paused... do you want to continue (ENTER yes ctrl-C no)")
                             input(">")
                 if trial%10==0:
@@ -328,7 +328,7 @@ class experiment_pressure:
                             c.move(0,0,-500,0)
                         except KeyboardInterrupt:
                             c.reset_trial()
-                            c.move(0,0,-1000,0)
+                            c.move(0,0,-500,0)
                             print("Paused... do you want to continue (ENTER yes ctrl-C no)")
                             input(">")
                 if trial%10==0:
