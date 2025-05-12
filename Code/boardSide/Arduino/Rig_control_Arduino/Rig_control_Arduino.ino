@@ -77,6 +77,7 @@ void ProcessCommand(String command) {
       Serial.print(states[0]);Serial.print(states[1]);Serial.println(states[2]);
       Serial.println("done");
   }else if (command=="CENTRE") {
+      Serial.print(positions[0]);Serial.print(positions[1]);Serial.println(positions[2]);
       rig.centre();
       Serial.println("done");
   }else {

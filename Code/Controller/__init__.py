@@ -180,7 +180,9 @@ class Arduino_Rig:
                     break
 
     def reset_trial(self):
+        print("RESET DEVICE...........")
         self.send_command_await("ZERO")
+        time.sleep(5)
 
     def calibrate(self,value=7500,lower=True,val=0):
         self.send_command_await("CALIB")
@@ -191,8 +193,6 @@ class Arduino_Rig:
 
     def move(self,x,y,z,a,step=5):
         self.send_command_await("MOVE,"+str(int(x))+","+str(int(y))+","+str(int(z))+","+str(step))
-    def reset_trial(self):
-        self.send_command_await("ZERO")
 
 if __name__ == "__main__":
     start=time.time()

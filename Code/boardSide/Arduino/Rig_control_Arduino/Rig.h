@@ -71,9 +71,9 @@ class RigControl {
           remainingSteps = steps[j];
           // Move one step for each motor
           if (remainingSteps > 0) {
-            if (j == 0) {myMotorA->step(step, dir[0], DOUBLE);positions[0] += step;}
-            else if (j == 1) {myMotorB->step(step, dir[1], DOUBLE);positions[1] += step;}
-            else if (j == 2) {myMotorC->step(step, dir[2], DOUBLE);positions[2] += step;}
+            if (j == 0) {myMotorA->step(step, dir[0], DOUBLE);positions[0] += step*(x/abs(x));}
+            else if (j == 1) {myMotorB->step(step, dir[1], DOUBLE);positions[1] += step*(y/abs(y));}
+            else if (j == 2) {myMotorC->step(step, dir[2], DOUBLE);positions[2] += step*(z/abs(z));}
             steps[j]=remainingSteps-step;
             if (steps[j]<0){steps[j]=0;}
           }
@@ -121,6 +121,7 @@ class RigControl {
     }
     void zero() {
       move(positions[0]*-1,positions[1]*-1,positions[2]*-1);
+      centre();
     }
     void calibrate() {
       move(set_value[0], set_value[1], set_value[2]);
