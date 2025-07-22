@@ -24,7 +24,7 @@ class experiment:
         ####################
         print("Connecting to sensor")
         connected=False
-        i=0
+        i=1
         self.cap=None
         if not presstip:
             while not connected:
@@ -55,17 +55,18 @@ class experiment:
         ret, frame = self.cap.read()
         if not ret:
             print("incorrect")
-            i=0
+            i=1
             while not ret:
                 self.cap = cv2.VideoCapture(i)
                 if not self.cap.isOpened():
+                    clear()
                     print("Error: Unable to access the webcam.")
                     i+=1
                 else:
                     print("CAmera channel",i)
                     connected=True
                     ret, frame = self.cap.read()
-                if i>10: i=0
+                if i>10: i=1
             
         return frame
     def runLinear(self,name,FORCE):
@@ -105,7 +106,10 @@ class experiment:
                         if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
                     return ar
-        data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.1)),len(np.arange(0,1,0.1)),50,*self.frame.shape),dtype=np.uint8)+1
+        if self.presstip:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.1)),len(np.arange(0,1,0.1)),50,*self.frame.shape),dtype=np.float64)+1
+        else:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.1)),len(np.arange(0,1,0.1)),50,*self.frame.shape),dtype=np.uint8)+1
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
                 for i,y in enumerate(np.arange(0,1,0.1)): #move y along surface 
@@ -170,7 +174,10 @@ class experiment:
                         if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
                     return ar
-        data=np.zeros((num_experiments,num_of_trials,len(np.arange(10,400,40)),50,*self.frame.shape),dtype=np.uint8)
+        if self.presstip:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(10,400,40)),50,*self.frame.shape),dtype=np.float64)
+        else:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(10,400,40)),50,*self.frame.shape),dtype=np.uint8)
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
                 for i,y in enumerate(np.arange(10,100,10)): #chose radius
@@ -235,8 +242,10 @@ class experiment:
                             break
                         increase+=0.01
                     return ar
-                    
-        data=np.zeros((num_experiments,num_of_trials,len(np.arange(10,400,40)),50,*self.frame.shape),dtype=np.uint8)
+        if self.presstip:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(10,400,40)),50,*self.frame.shape),dtype=np.float64)
+        else:            
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(10,400,40)),50,*self.frame.shape),dtype=np.uint8)
         for exp in range(num_experiments):
             for trial in range(num_of_trials): #gives you the ability to average over number of trials
                 for i,y in enumerate(np.arange(10,100,10)): #chose radius
