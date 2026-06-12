@@ -6,7 +6,6 @@ import cv2
 import matplotlib
 matplotlib.use('TkAgg')  # Use TkAgg, which avoids Qt
 
-
 def process(dataset):
     #154,206
     #237,255
