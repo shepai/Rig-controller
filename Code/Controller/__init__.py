@@ -120,7 +120,7 @@ class Controller:
             states=[(1-buttons[i])*100 for i in range(len(buttons))]
             self.move(states[3],states[2],states[0],1) #only move ones not pressed
             buttons=self.sendCommand("BUTTONS")
-    def calibrate(self,value=7500,lower=True,val=0):
+    def calibrate_texture(self,value=7500,lower=True,val=0):
         self.reset()
         #use the movement coords to get to point
         #the movements are preset to match those in self.sendCommand("getmove")[0:3]
@@ -130,6 +130,28 @@ class Controller:
             self.sendCommand("MOVE:0,-100,0,0")
         for i in range(4):
             self.sendCommand("MOVE:-100,-100,0,0")
+        print("Centred...")
+        self.sendCommand("setmove")
+        print("calibrating position...")
+        if lower:
+            self.sendCommand("lower="+str(value))
+            print("Lowered to point")
+        else:
+            self.sendCommand("MOVE:0,0,"+str(val)+",0")
+            print("Resetting..")
+            self.reset_trial()
+            
+        self.sendCommand("CALIB")
+        #self.sendCommand("centre")
+        print("Calibration done")
+    def calibrate_3d(self,value=7500,lower=True,val=0):
+        self.reset()
+        #use the movement coords to get to point
+        #the movements are preset to match those in self.sendCommand("getmove")[0:3]
+        for i in range(10):
+            self.sendCommand("MOVE:-100,-100,0,0")
+        for i in range(16):
+            self.sendCommand("MOVE:0,-100,0,0")
         print("Centred...")
         self.sendCommand("setmove")
         print("calibrating position...")
