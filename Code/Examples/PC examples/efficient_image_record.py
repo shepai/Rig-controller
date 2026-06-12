@@ -12,12 +12,12 @@ import os
 clear = lambda: os.system('clear')
 
 class experiment:
-    def __init__(self,presstip=False,Pressure_extra=-480):
+    def __init__(self,presstip=False,Pressure_extra=-480,softpress=False):
         
         path="/home/dexter/Documents/Rig-controller/Code/Examples/Board Examples/listener_MP.py"
         self.path_to_save="/home/dexter/Documents/data/"
         self.c= Controller.Controller("/dev/ttyACM1",file=path)
-        THRESH=6000
+        self.THRESH=6000
         #Pressure_extra=-480  #-480 for normal -880 for foam -230 for cork and carpets
         #####################
         # Set up secondary sensor
@@ -45,12 +45,18 @@ class experiment:
             self.B.runFile("/home/dexter/Documents/TactileSensor/Code/TactileSensor/Board side/boardSide.py")
             print("File ran")
             self.frame=np.array(list(self.B.getSensor(type_="round",num=16)))#
-            Pressure_extra-=350
+            
+            if not softpress:
+                Pressure_extra-=350
         self.presstip=presstip
         
         self.pressure_extra=Pressure_extra
-        self.c.calibrate(value=THRESH,lower=False,val=Pressure_extra) #takes a while - only want to do once
         print("COMPONENTS",self.frame.shape)
+    def calibrate(self,mode=1):
+        if mode==0:
+            self.c.calibrate_texture(value=self.THRESH,lower=False,val=self.pressure_extra) #takes a while - only want to do once
+        elif mode==1:
+            self.c.calibrate_3d(value=self.THRESH,lower=False,val=self.pressure_extra) #takes a while - only want to do once
     def getCamera(self):
         ret, frame = self.cap.read()
         if not ret:
@@ -90,17 +96,19 @@ class experiment:
                     y_vector=10*dirs[1]
                     if not self.presstip:
                         frame=self.getCamera()
+                        ar=np.zeros((50,*frame.shape),dtype=np.uint8)
                     else:
                         frame=np.array(list(self.B.getSensor(type_="round",num=16)))
-                    ar=np.zeros((50,*frame.shape),dtype=np.uint8)
+                        ar=np.zeros((50,*frame.shape),dtype=np.float64)
                     for i in range(0,50):
                         self.c.move(x_vector,y_vector,0,0)
                         if not self.presstip:
                             frame=self.getCamera()
                         else:
                             frame=np.array(list(self.B.getSensor(type_="round",num=16)))
-                        ar[i]=frame
+
                         
+                        ar[i]=frame
                         cv2.imshow('TacTip Feed', frame)
                         # Check for the 'q' key to exit the loop
                         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -130,6 +138,8 @@ class experiment:
                             self.c.move(0,0,1000,0)
                             print("Paused... do you want to continue (ENTER yes ctrl-C no)")
                             input(">")
+                            exit()
+
                 if trial%10==0:
                     np.save(self.path_to_save+"/"+name,data) #constant backups
         del data
@@ -156,9 +166,10 @@ class experiment:
                     t1=time.time()
                     if not self.presstip:
                         frame=self.getCamera()
+                        ar=np.zeros((50,*frame.shape),dtype=np.uint8)
                     else:
                         frame=np.array(list(self.B.getSensor(type_="round",num=16)))
-                    ar=np.zeros((50,*frame.shape),dtype=np.uint8)
+                        ar=np.zeros((50,*frame.shape),dtype=np.float64)
                     for i,t in enumerate(np.arange(0,5,0.1)):
                         x = radius * np.sin(t)
                         y = radius * np.cos(t)
@@ -202,7 +213,56 @@ class experiment:
         del data
         #plt.show()
         print("TOTAL EXECUTION TIME:",(time.time()-starttime)/(60*60),"hours")
-    
+    def runTiny(self,name,FORCE):
+        self.FORCE=FORCE
+        #####################
+        #Experiment hyperparameters
+        ####################
+        num_experiments=1
+        num_of_trials=2
+        starttime=time.time()
+        total_operations=(num_of_trials*(len(np.arange(0,1,0.1))**2))*num_experiments
+        EDGE_VALUE=0
+
+        if self.presstip:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.2)),len(np.arange(0,1,0.2)),*self.frame.shape),dtype=np.float64)+1
+        else:
+            data=np.zeros((num_experiments,num_of_trials,len(np.arange(0,1,0.2)),len(np.arange(0,1,0.2)),*self.frame.shape),dtype=np.uint8)+1
+        t0=time.time()
+        for exp in range(num_experiments):
+            for trial in range(num_of_trials): #gives you the ability to average over number of trials
+                for i,y in enumerate(np.arange(0,1,0.2)): #move y along surface 
+                    self.c.reset_trial() #return to center position
+                    #self.c.move(EDGE_VALUE+0,50,50-self.FORCE,0)
+                    time.sleep(2)
+                    self.c.move(0,0,100,0)
+                    self.c.move(0,y*500,0,0)
+                    time.sleep(1)
+                    for j,x in enumerate(reversed(np.arange(0,1,0.2))): #move direction of x along
+                        clear()
+                        print(trial,i,j,"TIme passed:",(time.time()-t0)/60,"Minutes")
+                        self.c.move(0,0,-100,0)
+                        self.c.move(x*-50,0,0,0)
+                        time.sleep(1)
+                        if not self.presstip:
+                            frame=self.getCamera()
+                        else:
+                            frame=np.array(list(self.B.getSensor(type_="round",num=16)))
+                        
+                        
+
+                        cv2.imshow('TacTip Feed', frame)
+                        # Check for the 'q' key to exit the loop
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                                break
+                        
+                        data[exp][trial][i][j]=frame.copy()
+                        self.c.move(0,0,100,0)
+                np.save(self.path_to_save+"/"+name,data) #constant backups
+        del data
+        #plt.show()
+        self.c.move(0,500,0,0)
+        print("TOTAL EXECUTION TIME:",(time.time()-starttime)/(60*60),"hours")
     def runPressure(self,name,FORCE):
         self.FORCE=FORCE
         #####################
@@ -222,9 +282,10 @@ class experiment:
                     t1=time.time()
                     if not self.presstip:
                         frame=self.getCamera()
+                        ar=np.zeros((50,*frame.shape),dtype=np.uint8)
                     else:
                         frame=np.array(list(self.B.getSensor(type_="round",num=16)))
-                    ar=np.zeros((50,*frame.shape),dtype=np.uint8)
+                        ar=np.zeros((50,*frame.shape),dtype=np.float64)
                     increase=0
                     for i,t in enumerate(np.arange(0,5,0.1)):
                         x = radius * np.sin(t)
